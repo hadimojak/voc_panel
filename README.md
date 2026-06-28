@@ -1,15 +1,13 @@
 
 ```
 VOC_panel
-├─ .dev.env
 ├─ .prettierrc
-├─ .prod.env
-├─ .sample.env
 ├─ eslint.config.mjs
 ├─ nest-cli.json
 ├─ package-lock.json
 ├─ package.json
 ├─ README.md
+├─ samplData.json
 ├─ src
 │  ├─ app.controller.ts
 │  ├─ app.module.ts
@@ -24,7 +22,10 @@ VOC_panel
 │  │  ├─ create-database.ts
 │  │  ├─ data-source.ts
 │  │  ├─ database.module.ts
-│  │  └─ database.providers.ts
+│  │  ├─ database.providers.ts
+│  │  └─ migrations
+│  │     ├─ 1782656144284-name.ts
+│  │     └─ seed.sample.ts
 │  ├─ main.ts
 │  ├─ task
 │  │  └─ task.service.ts
