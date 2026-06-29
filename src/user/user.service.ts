@@ -6,8 +6,7 @@ import { UserEntity } from './user.entity';
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(UserEntity)
-    private userRepo: Repository<UserEntity>,
+    @InjectRepository(UserEntity) private userRepo: Repository<UserEntity>,
   ) {}
 
   findByUsername(username: string) {
@@ -23,7 +22,7 @@ export class UserService {
     return this.userRepo.save(user);
   }
 
-  updateRefreshToken(userId: number, token: string | null) {
-    return this.userRepo.update(userId, { refreshTokenHash: token });
+  updateRefreshToken(userId: number, hash: string | null) {
+    return this.userRepo.update(userId, { refreshTokenHash: hash });
   }
 }

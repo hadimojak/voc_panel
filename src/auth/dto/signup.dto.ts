@@ -5,7 +5,7 @@ import { IsNotEmpty, IsString, MinLength } from 'class-validator';
 export class SignupDto {
   @ApiProperty({
     description: 'Unique username for the account',
-    example: 'sahar_dev',
+    example: 'hadi',
   })
   @IsNotEmpty()
   @IsString()
@@ -13,7 +13,7 @@ export class SignupDto {
 
   @ApiProperty({
     description: 'Password must be at least 6 characters long',
-    example: 'SecurePass123!',
+    example: '123456',
     minLength: 6,
   })
   @IsNotEmpty()
