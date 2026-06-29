@@ -53,10 +53,8 @@ export class AuthService {
 
     const { accessToken, refreshToken } = await this.generateTokens(payload);
 
-    await this.userService.updateRefreshToken(
-      user.id,
-      await bcrypt.hash(refreshToken, 10),
-    );
+    const refreshHash = await bcrypt.hash(refreshToken, 10);
+    await this.userService.updateRefreshToken(user.id, refreshHash);
 
     return {
       access_token: accessToken,
@@ -65,6 +63,8 @@ export class AuthService {
   }
 
   async refresh(userId: number, refreshToken: string) {
+    console.log("herrreee");
+    
     const user = await this.userService.findById(userId);
 
     if (!user || !user.refreshTokenHash) throw new UnauthorizedException();
