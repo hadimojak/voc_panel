@@ -7,6 +7,7 @@ import {
 import { ConfigService } from './config/config.service';
 import { Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { DataSource } from 'typeorm';
 
 async function bootstrap() {
   const { port } = ConfigService.config.app;
@@ -24,6 +25,18 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
+
+  try {
+    const dataSource = app.get(DataSource);
+    await dataSource.query('SELECT 1');
+
+    console.log('db connected');
+  } catch (error) {
+    console.error('db connection failed');
+    console.error(error);
+    await app.close();
+    process.exit(1);
+  }
 
   await app.listen(port);
   Logger.verbose(`API running on http://localhost:${port}`);

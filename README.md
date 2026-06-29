@@ -23,9 +23,9 @@ VOC_panel
 │  │  ├─ data-source.ts
 │  │  ├─ database.module.ts
 │  │  ├─ database.providers.ts
-│  │  └─ migrations
-│  │     ├─ 1782656144284-name.ts
-│  │     └─ seed.sample.ts
+│  │  ├─ migrations
+│  │  │  └─ 1782656144284-name.ts
+│  │  └─ seed.ts
 │  ├─ main.ts
 │  ├─ task
 │  │  └─ task.service.ts

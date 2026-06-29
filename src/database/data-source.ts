@@ -12,5 +12,5 @@ export const AppDataSource = new DataSource({
   database: ConfigService.config.postgress.POSTGRES_DB,
   entities: [TicketEntity],
   migrations: ['src/database/migrations/*.ts'],
-  synchronize: false,
+  synchronize: true,
 });

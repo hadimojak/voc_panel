@@ -12,7 +12,7 @@ import { ConfigService } from 'src/config/config.service';
       password: ConfigService.config.postgress.POSTGRES_PASSWORD,
       database: ConfigService.config.postgress.POSTGRES_DB,
       autoLoadEntities: true,
-      synchronize: false,
+      synchronize: true,
     }),
   ],
 })

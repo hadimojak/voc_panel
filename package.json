@@ -22,8 +22,8 @@
     "migration:gen": "cross-env NODE_ENV=dev typeorm-ts-node-commonjs -d src/database/data-source.ts migration:generate src/database/migrations/%npm_config_name%",
     "migration:run": "npm run typeorm migration:run ",
     "migration:create": "npm run typeorm migration:create src/database/migrations/NewMigration",
-    "db:create": "ts-node src/database/create-database.ts",
-    "seed": "ts-node src/database/seed.ts"
+    "db:create": "ts-node src/database/migrations/create-database.ts",
+    "seed": "ts-node src/database/migrations/seed.ts"
   },
   "dependencies": {
     "@fastify/static": "^9.1.3",
