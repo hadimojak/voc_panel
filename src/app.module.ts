@@ -6,9 +6,11 @@ import { ConfigService } from './config/config.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { DatabaseModule } from './database/database.module';
 import { TicketModule } from './ticket/ticket.module';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
 
 @Module({
-  imports: [ScheduleModule.forRoot(), DatabaseModule, TicketModule],
+  imports: [ScheduleModule.forRoot(), DatabaseModule, TicketModule, AuthModule, UserModule],
   controllers: [AppController],
   providers: [AppService, TaskService, ConfigService],
 })
