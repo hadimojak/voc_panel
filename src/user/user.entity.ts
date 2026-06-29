@@ -1,3 +1,5 @@
+// src/user/user.entity.ts
+
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('users')
@@ -8,9 +10,9 @@ export class UserEntity {
   @Column({ unique: true })
   username!: string;
 
-  @Column()
+  @Column({ type: 'text' })
   password!: string;
 
   @Column({ type: 'text', nullable: true })
-  refreshToken!: string | null;
+  refreshTokenHash!: string | null; // ✅ hashed token
 }

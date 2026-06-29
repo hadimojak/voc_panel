@@ -19,11 +19,11 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "typeorm-ts-node-commonjs -d src/database/data-source.ts",
-    "migration:gen": "cross-env NODE_ENV=dev typeorm-ts-node-commonjs -d src/database/data-source.ts migration:generate src/database/migrations/%npm_config_name%",
+    "migration:gen": "cross-env NODE_ENV=dev node -r ts-node/register -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d src/database/data-source.ts migration:generate src/database/migrations/%npm_config_name%",
     "migration:run": "npm run typeorm migration:run ",
     "migration:create": "npm run typeorm migration:create src/database/migrations/NewMigration",
-    "db:create": "ts-node src/database/migrations/create-database.ts",
-    "seed": "ts-node src/database/migrations/seed.ts"
+    "db:create": "ts-node src/database/create-database.ts",
+    "seed": "ts-node src/database/seed.ts"
   },
   "dependencies": {
     "@fastify/static": "^9.1.3",
@@ -37,6 +37,7 @@
     "@nestjs/swagger": "^11.4.4",
     "@nestjs/typeorm": "^11.0.3",
     "bcrypt": "^6.0.0",
+    "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "cross-env": "^10.1.0",
     "dotenv": "^17.4.2",

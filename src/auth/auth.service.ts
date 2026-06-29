@@ -1,14 +1,19 @@
 import {
+  ConflictException,
   Injectable,
   UnauthorizedException,
-  ConflictException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from '../user/user.service';
-import { SignupDto } from './dto/signup.dto';
-import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
-import { ConfigService } from 'src/config/config.service';
+import { ConfigService } from '../config/config.service';
+import { UserService } from '../user/user.service';
+import { LoginDto } from './dto/login.dto';
+import { SignupDto } from './dto/signup.dto';
+
+type TokenPayload = {
+  sub: number;
+  username: string;
+};
 
 @Injectable()
 export class AuthService {
@@ -18,78 +23,96 @@ export class AuthService {
   ) {}
 
   async signup(dto: SignupDto) {
-    const exists = await this.userService.findByUsername(dto.username);
+    const existingUser = await this.userService.findByUsername(dto.username);
+    if (existingUser) throw new ConflictException('Username already exists');
 
-    if (exists) {
-      throw new ConflictException('Username already exists');
-    }
-
-    const hashed = await bcrypt.hash(dto.password, 10);
-
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
     const user = await this.userService.create({
       username: dto.username,
-      password: hashed,
+      password: hashedPassword,
     });
 
-    return this.generateTokens(user.id, user.username);
+    return {
+      id: user.id,
+      username: user.username,
+    };
   }
 
   async login(dto: LoginDto) {
     const user = await this.userService.findByUsername(dto.username);
 
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+    if (!user) throw new UnauthorizedException();
 
-    const valid = await bcrypt.compare(dto.password, user.password);
+    const isMatch = await bcrypt.compare(dto.password, user.password);
+    if (!isMatch) throw new UnauthorizedException();
 
-    if (!valid) throw new UnauthorizedException('Invalid credentials');
+    const payload: TokenPayload = {
+      sub: user.id,
+      username: user.username,
+    };
 
-    const tokens = await this.generateTokens(user.id, user.username);
+    const { accessToken, refreshToken } = await this.generateTokens(payload);
 
-    await this.userService.updateRefreshToken(user.id, tokens.refreshToken);
+    await this.userService.updateRefreshToken(
+      user.id,
+      await bcrypt.hash(refreshToken, 10),
+    );
 
-    return tokens;
+    return {
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    };
   }
 
   async refresh(userId: number, refreshToken: string) {
     const user = await this.userService.findById(userId);
 
-    if (!user || user.refreshToken !== refreshToken) {
+    if (!user || !user.refreshTokenHash)
       throw new UnauthorizedException();
-    }
 
-    const tokens = await this.generateTokens(user.id, user.username);
+    const isRefreshTokenValid = await bcrypt.compare(
+      refreshToken,
+      user.refreshTokenHash,
+    );
 
-    await this.userService.updateRefreshToken(user.id, tokens.refreshToken);
+    if (!isRefreshTokenValid) throw new UnauthorizedException();
 
-    return tokens;
+    const payload: TokenPayload = {
+      sub: user.id,
+      username: user.username,
+    };
+
+    const { accessToken, refreshToken: newRefreshToken } =
+      await this.generateTokens(payload);
+
+    await this.userService.updateRefreshToken(
+      user.id,
+      await bcrypt.hash(newRefreshToken, 10),
+    );
+
+    return {
+      access_token: accessToken,
+      refresh_token: newRefreshToken,
+    };
   }
 
   async logout(userId: number) {
     await this.userService.updateRefreshToken(userId, null);
-
     return { message: 'Logged out successfully' };
   }
 
-  async generateTokens(userId: number, username: string) {
-    const payload = {
-      sub: userId,
-      username,
-    };
+  private async generateTokens(payload: TokenPayload) {
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: ConfigService.config.jwt.SECRET,
+        expiresIn: '15m',
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: ConfigService.config.jwt.REFRESH_SECRET,
+        expiresIn: '7d',
+      }),
+    ]);
 
-    const accessToken = await this.jwtService.signAsync(payload, {
-      secret: ConfigService.config.jwt.SECRET,
-      expiresIn: '15m',
-    });
-
-    const refreshToken = await this.jwtService.signAsync(payload, {
-      secret: ConfigService.config.jwt.REFRESH_SECRET,
-      expiresIn: '7d',
-    });
-
-    return {
-      accessToken,
-      refreshToken,
-      username,
-    };
+    return { accessToken, refreshToken };
   }
 }

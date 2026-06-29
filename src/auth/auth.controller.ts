@@ -1,10 +1,4 @@
-import {
-  Body,
-  Controller,
-  Post,
-  UseGuards,
-  Req,
-} from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
@@ -15,7 +9,8 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBody,
-  ApiBearerAuth
+  ApiBearerAuth,
+  ApiHeader,
 } from '@nestjs/swagger';
 
 @ApiTags('Auth')
@@ -56,6 +51,11 @@ export class AuthController {
   @Post('refresh')
   @UseGuards(JwtRefreshGuard)
   @ApiBearerAuth()
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Refresh token in the format: Bearer <token>',
+    required: true,
+  })
   @ApiOperation({ summary: 'Refresh access token using refresh token' })
   @ApiResponse({
     status: 200,
@@ -66,15 +66,17 @@ export class AuthController {
     description: 'Invalid refresh token',
   })
   refresh(@Req() req: any) {
-    return this.authService.refresh(
-      req.user.userId,
-      req.user.refreshToken,
-    );
+    return this.authService.refresh(req.user.userId, req.user.refreshToken);
   }
 
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Access token in the format: Bearer <token>',
+    required: true,
+  })
   @ApiOperation({ summary: 'Logout user and revoke refresh token' })
   @ApiResponse({
     status: 200,

@@ -24,6 +24,6 @@ export class UserService {
   }
 
   updateRefreshToken(userId: number, token: string | null) {
-    return this.userRepo.update(userId, { refreshToken: token });
+    return this.userRepo.update(userId, { refreshTokenHash: token });
   }
 }

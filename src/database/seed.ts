@@ -1,12 +1,12 @@
 import 'reflect-metadata';
-import { AppDataSource } from '../data-source';
-import { TicketEntity } from '../../ticket/ticket.entity';
+import { AppDataSource } from './data-source';
+import { TicketEntity } from './../ticket/ticket.entity';
 import * as fs from 'fs';
 import * as path from 'path';
 
 async function seed() {
   try {
-    const filePath = path.resolve(process.cwd(), 'clean-data.json');
+    const filePath = path.resolve(process.cwd(), 'samplData.json');
 
     if (!fs.existsSync(filePath)) {
       throw new Error(`Seed file not found: ${filePath}`);
