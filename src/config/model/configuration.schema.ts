@@ -9,4 +9,7 @@ export const ConfigValidationSchema = Joi.object<EnvValidationInterface>({
   POSTGRES_DB: Joi.string().required(),
   POSTGRES_USER: Joi.string().alphanum().min(3).required(),
   POSTGRES_PASSWORD: Joi.string().min(6).required(),
+  //jwt
+  JWT_SECRET: Joi.string().required(),
+  JWT_REFRESH_SECRET: Joi.string().required(),
 }).unknown(true);

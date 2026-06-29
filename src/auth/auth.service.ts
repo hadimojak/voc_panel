@@ -8,6 +8,7 @@ import { UserService } from '../user/user.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
+import { ConfigService } from 'src/config/config.service';
 
 @Injectable()
 export class AuthService {
@@ -76,18 +77,19 @@ export class AuthService {
     };
 
     const accessToken = await this.jwtService.signAsync(payload, {
-      secret: process.env.JWT_SECRET || 'access-secret',
+      secret: ConfigService.config.jwt.SECRET,
       expiresIn: '15m',
     });
 
     const refreshToken = await this.jwtService.signAsync(payload, {
-      secret: process.env.JWT_REFRESH_SECRET || 'refresh-secret',
+      secret: ConfigService.config.jwt.REFRESH_SECRET,
       expiresIn: '7d',
     });
 
     return {
       accessToken,
       refreshToken,
+      username,
     };
   }
 }

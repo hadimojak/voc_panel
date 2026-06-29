@@ -1,17 +1,18 @@
 import { Client } from 'pg';
+import { ConfigService } from 'src/config/config.service';
 
 async function createDatabase() {
   const client = new Client({
-    host: process.env.DB_HOST || 'localhost',
-    port: Number(process.env.DB_PORT) || 5432,
-    user: process.env.DB_USERNAME || 'postgres',
-    password: process.env.DB_PASSWORD || 'postgres',
+    host: ConfigService.config.postgress.POSTGRES_HOST,
+    port: ConfigService.config.postgress.POSTGRES_PORT,
+    user: ConfigService.config.postgress.POSTGRES_USER,
+    password: ConfigService.config.postgress.POSTGRES_PASSWORD,
     database: 'postgres', // connect to default database
   });
 
   await client.connect();
 
-  const dbName = process.env.DB_NAME || 'voc_panel';
+  const dbName = ConfigService.config.postgress.POSTGRES_DB;
 
   const res = await client.query(
     `SELECT 1 FROM pg_database WHERE datname='${dbName}'`,

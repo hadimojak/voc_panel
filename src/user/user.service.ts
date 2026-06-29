@@ -7,23 +7,23 @@ import { UserEntity } from './user.entity';
 export class UserService {
   constructor(
     @InjectRepository(UserEntity)
-    private repo: Repository<UserEntity>,
+    private userRepo: Repository<UserEntity>,
   ) {}
 
   findByUsername(username: string) {
-    return this.repo.findOne({ where: { username } });
+    return this.userRepo.findOne({ where: { username } });
   }
 
   findById(id: number) {
-    return this.repo.findOne({ where: { id } });
+    return this.userRepo.findOne({ where: { id } });
   }
 
   create(data: Partial<UserEntity>) {
-    const user = this.repo.create(data);
-    return this.repo.save(user);
+    const user = this.userRepo.create(data);
+    return this.userRepo.save(user);
   }
 
   updateRefreshToken(userId: number, token: string | null) {
-    return this.repo.update(userId, { refreshToken: token });
+    return this.userRepo.update(userId, { refreshToken: token });
   }
 }
