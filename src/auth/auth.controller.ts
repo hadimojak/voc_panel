@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards, Req } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
@@ -18,20 +18,20 @@ import {
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Post('signup')
-  @ApiOperation({ summary: 'Create a new user account' })
-  @ApiBody({ type: SignupDto })
-  @ApiResponse({
-    status: 201,
-    description: 'User successfully created',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid input data',
-  })
-  signup(@Body() dto: SignupDto) {
-    return this.authService.signup(dto);
-  }
+  // @Post('signup')
+  // @ApiOperation({ summary: 'Create a new user account' })
+  // @ApiBody({ type: SignupDto })
+  // @ApiResponse({
+  //   status: 201,
+  //   description: 'User successfully created',
+  // })
+  // @ApiResponse({
+  //   status: 400,
+  //   description: 'Invalid input data',
+  // })
+  // signup(@Body() dto: SignupDto) {
+  //   return this.authService.signup(dto);
+  // }
 
   @Post('login')
   @ApiOperation({ summary: 'User login and receive tokens' })
@@ -88,5 +88,18 @@ export class AuthController {
   })
   logout(@Req() req: any) {
     return this.authService.logout(req.user.userId);
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current authenticated user' })
+  me(@Req() req: any) {
+    return {
+      user: {
+        id: req.user.userId,
+        username: req.user.username,
+      },
+    };
   }
 }

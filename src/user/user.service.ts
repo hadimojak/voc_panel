@@ -25,4 +25,9 @@ export class UserService {
   updateRefreshToken(userId: number, hash: string | null) {
     return this.userRepo.update(userId, { refreshTokenHash: hash });
   }
+
+  async revokeTokens(userId: number) {
+    await this.userRepo.increment({ id: userId }, 'tokenVersion', 1);
+    return this.updateRefreshToken(userId, null);
+  }
 }

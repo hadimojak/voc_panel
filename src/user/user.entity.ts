@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('users')
 export class UserEntity {
@@ -12,5 +18,23 @@ export class UserEntity {
   password!: string;
 
   @Column({ type: 'text', nullable: true })
-  refreshTokenHash!: string | null; // ✅ hashed token
+  refreshTokenHash!: string | null;
+
+  @Column({ type: 'int', default: 0 })
+  tokenVersion!: number;
+
+  @Column({ type: 'text', nullable: true })
+  passwordResetToken!: string | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  passwordResetExpiresAt!: Date | null;
+
+  @CreateDateColumn()
+  createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
+
+  @Column({ unique: true, nullable: true })
+  email!: string;
 }

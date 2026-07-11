@@ -13,6 +13,7 @@ import { SignupDto } from './dto/signup.dto';
 type TokenPayload = {
   sub: number;
   username: string;
+  tokenVersion: number;
 };
 
 @Injectable()
@@ -22,21 +23,21 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signup(dto: SignupDto) {
-    const existingUser = await this.userService.findByUsername(dto.username);
-    if (existingUser) throw new ConflictException('Username already exists');
+  // async signup(dto: SignupDto) {
+  //   const existingUser = await this.userService.findByUsername(dto.username);
+  //   if (existingUser) throw new ConflictException('Username already exists');
 
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
-    const user = await this.userService.create({
-      username: dto.username,
-      password: hashedPassword,
-    });
+  //   const hashedPassword = await bcrypt.hash(dto.password, 10);
+  //   const user = await this.userService.create({
+  //     username: dto.username,
+  //     password: hashedPassword,
+  //   });
 
-    return {
-      id: user.id,
-      username: user.username,
-    };
-  }
+  //   return {
+  //     id: user.id,
+  //     username: user.username,
+  //   };
+  // }
 
   async login(dto: LoginDto) {
     const user = await this.userService.findByUsername(dto.username);
@@ -49,6 +50,7 @@ export class AuthService {
     const payload: TokenPayload = {
       sub: user.id,
       username: user.username,
+      tokenVersion: user.tokenVersion,
     };
 
     const { accessToken, refreshToken } = await this.generateTokens(payload);
@@ -57,13 +59,16 @@ export class AuthService {
     await this.userService.updateRefreshToken(user.id, refreshHash);
 
     return {
+      user: {
+        email: user.email,
+        username: user.username,
+      },
       access_token: accessToken,
       refresh_token: refreshToken,
     };
   }
 
   async refresh(userId: number, refreshToken: string) {
-    console.log("herrreee");
     
     const user = await this.userService.findById(userId);
 
@@ -79,6 +84,7 @@ export class AuthService {
     const payload: TokenPayload = {
       sub: user.id,
       username: user.username,
+      tokenVersion: user.tokenVersion,
     };
 
     const { accessToken, refreshToken: newRefreshToken } =
@@ -96,7 +102,7 @@ export class AuthService {
   }
 
   async logout(userId: number) {
-    await this.userService.updateRefreshToken(userId, null);
+    await this.userService.revokeTokens(userId);
     return { message: 'Logged out successfully' };
   }
 

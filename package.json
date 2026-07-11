@@ -23,7 +23,8 @@
     "migration:run": "npm run typeorm migration:run ",
     "migration:create": "npm run typeorm migration:create src/database/migrations/NewMigration",
     "db:create": "ts-node src/database/create-database.ts",
-    "seed": "ts-node src/database/seed.ts"
+    "seed": "ts-node src/database/seed.ts",
+    "admin:seed": "ts-node src/database/create-admin.seed.ts"
   },
   "dependencies": {
     "@fastify/static": "^9.1.3",
@@ -58,6 +59,7 @@
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.0.0",
+    "@types/pg": "^8.20.0",
     "@types/supertest": "^7.0.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",

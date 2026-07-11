@@ -1,5 +1,5 @@
 import { Client } from 'pg';
-import { ConfigService } from 'src/config/config.service';
+import { ConfigService } from '../config/config.service';
 
 async function createDatabase() {
   const client = new Client({
