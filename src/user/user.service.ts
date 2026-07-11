@@ -9,25 +9,27 @@ export class UserService {
     @InjectRepository(UserEntity) private userRepo: Repository<UserEntity>,
   ) {}
 
-  findByUsername(username: string) {
-    return this.userRepo.findOne({ where: { username } });
+  async findByUsername(username: string) {
+    return await this.userRepo.findOne({ where: { username } });
   }
 
-  findById(id: number) {
-    return this.userRepo.findOne({ where: { id } });
+  async findById(id: number) {
+    return await this.userRepo.findOne({ where: { id } });
   }
 
-  create(data: Partial<UserEntity>) {
+  async create(data: Partial<UserEntity>) {
     const user = this.userRepo.create(data);
-    return this.userRepo.save(user);
+    return await this.userRepo.save(user);
   }
 
-  updateRefreshToken(userId: number, hash: string | null) {
-    return this.userRepo.update(userId, { refreshTokenHash: hash });
+  async updateRefreshToken(userId: number, hash: string | null) {
+    console.log({ hash });
+
+    return await this.userRepo.update(userId, { refreshTokenHash: hash });
   }
 
   async revokeTokens(userId: number) {
     await this.userRepo.increment({ id: userId }, 'tokenVersion', 1);
-    return this.updateRefreshToken(userId, null);
+    return await this.updateRefreshToken(userId, null);
   }
 }
