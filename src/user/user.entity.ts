@@ -8,7 +8,7 @@ import {
 
 export enum UserRole {
   admin,
-  viewer,
+  user,
 }
 
 @Entity('users')
