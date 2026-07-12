@@ -10,10 +10,10 @@ async function seed() {
     const filePathArr: string[] = [];
     const filePath1 = path.resolve(process.cwd(), 'day-ticket-1.json');
     filePathArr.push(filePath1);
-    const filePath2 = path.resolve(process.cwd(), 'day-ticket-2.json');
-    filePathArr.push(filePath2);
-    const filePath3 = path.resolve(process.cwd(), 'day-ticket-3.json');
-    filePathArr.push(filePath3);
+    // const filePath2 = path.resolve(process.cwd(), 'day-ticket-2.json');
+    // filePathArr.push(filePath2);
+    // const filePath3 = path.resolve(process.cwd(), 'day-ticket-3.json');
+    // filePathArr.push(filePath3);
 
     for (let index = 0; index < filePathArr.length; index++) {
       const filePath = filePathArr[index];

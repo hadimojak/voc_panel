@@ -102,4 +102,6 @@ export class AuthController {
       },
     };
   }
+
+  //ad route for reset password with organization email
 }

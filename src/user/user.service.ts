@@ -32,4 +32,6 @@ export class UserService {
     await this.userRepo.increment({ id: userId }, 'tokenVersion', 1);
     return await this.updateRefreshToken(userId, null);
   }
+
+  async updateUserProfile(userId: number, payload) {}
 }

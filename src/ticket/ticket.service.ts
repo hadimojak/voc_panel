@@ -19,4 +19,24 @@ export class TicketService {
       order: { ticketid: 'DESC' },
     });
   }
+
+  async findAll(
+    page: number,
+    limit: number,
+  ): Promise<{ data: TicketEntity[]; total: number }> {
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await this.ticketRepo.findAndCount({
+      skip: skip,
+      take: limit,
+      order: {
+        createdtime: 'DESC', // معمولاً تیکت‌های جدیدتر در ابتدا نمایش داده می‌شوند
+      },
+    });
+
+    return {
+      data,
+      total,
+    };
+  }
 }
