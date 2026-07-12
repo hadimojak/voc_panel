@@ -113,8 +113,6 @@ export class UserService {
   }
 
   async updateRefreshToken(userId: number, hash: string | null) {
-    console.log({ hash });
-
     return await this.userRepo.update(userId, { refreshTokenHash: hash });
   }
 

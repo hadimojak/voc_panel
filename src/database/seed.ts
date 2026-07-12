@@ -38,7 +38,6 @@ async function seed() {
       const chunks = chunk(tickets, chunkSize);
 
       for (const batch of chunks) {
-        // console.log({ batch });
         const sanitizedBatch = batch.map((ticket) => ({
           ...ticket,
           closeddate: ticket.closeddate === '' ? null : ticket.closeddate,
