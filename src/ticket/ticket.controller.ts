@@ -1,14 +1,27 @@
-import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Post,
+  Query,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiOperation,
   ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import type { FastifyReply } from 'fastify';
 import { TicketService } from './ticket.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { TicketEntity } from './ticket.entity';
+import { ExportTicketsDto } from './dto/export-tickets.dto';
 
 @Controller('ticket')
 @ApiTags('Tickets')
@@ -52,5 +65,30 @@ export class TicketController {
         limit: limitNumber,
       },
     };
+  }
+
+  @Post('export')
+  @UseGuards(JwtAuthGuard) // حفاظت از متد با توکن امنیتی JWT
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Export selected tickets to Excel' })
+  @ApiBody({ type: ExportTicketsDto })
+  async exportTickets(
+    @Body() exportDto: ExportTicketsDto,
+    @Res() res: FastifyReply,
+  ) {
+    const buffer = await this.ticketService.exportToExcel(exportDto.ticketIds);
+
+    // تنظیم هدرهای HTTP برای دانلود فایل اکسل در مرورگر
+    res.header(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.header(
+      'Content-Disposition',
+      'attachment; filename="tickets_export.xlsx"',
+    );
+    res.header('Content-Length', `${buffer.length}`);
+
+    return res.status(HttpStatus.OK).send(buffer);
   }
 }

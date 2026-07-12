@@ -99,6 +99,7 @@ export class AuthController {
       user: {
         id: req.user.userId,
         username: req.user.username,
+        role: req.user.role,
       },
     };
   }

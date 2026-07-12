@@ -62,6 +62,7 @@ export class AuthService {
       user: {
         email: user.email,
         username: user.username,
+        role: user.role,
       },
       access_token: accessToken,
       refresh_token: refreshToken,
@@ -69,7 +70,6 @@ export class AuthService {
   }
 
   async refresh(userId: number, refreshToken: string) {
-    
     const user = await this.userService.findById(userId);
 
     if (!user || !user.refreshTokenHash) throw new UnauthorizedException();
@@ -96,6 +96,11 @@ export class AuthService {
     );
 
     return {
+      user: {
+        email: user.email,
+        username: user.username,
+        role: user.role,
+      },
       access_token: accessToken,
       refresh_token: newRefreshToken,
     };

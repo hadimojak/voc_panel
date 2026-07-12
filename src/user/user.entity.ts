@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-enum UserRole {
+export enum UserRole {
   admin,
   viewer,
 }
