@@ -102,4 +102,5 @@ docker-compose.override.yml
 # ------------------------------
 src/database/migrations/*.js
 src/database/migrations/*.js.map
+day-ticket-1.json
 ```
