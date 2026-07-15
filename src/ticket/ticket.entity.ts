@@ -70,4 +70,10 @@ export class TicketEntity {
 
   @Column({ type: 'varchar', nullable: true })
   ownername!: string;
+
+  @Column({ type: 'double precision', nullable: true })
+  lat?: number;
+
+  @Column({ type: 'double precision', nullable: true })
+  lng?: number;
 }

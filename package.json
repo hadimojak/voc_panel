@@ -24,7 +24,8 @@
     "migration:create": "npm run typeorm migration:create src/database/migrations/NewMigration",
     "db:create": "ts-node src/database/create-database.ts",
     "seed": "ts-node src/database/seed.ts",
-    "admin:seed": "ts-node src/database/create-admin.seed.ts"
+    "admin:seed": "ts-node src/database/create-admin.seed.ts",
+    "latlng:seed": "ts-node src/database/add_lat_lng.seed.ts"
   },
   "dependencies": {
     "@fastify/static": "^9.1.3",
