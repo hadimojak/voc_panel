@@ -8,4 +8,9 @@ export interface EnvValidationInterface {
   POSTGRES_PASSWORD: string;
   JWT_SECRET: string;
   JWT_REFRESH_SECRET: string;
+
+  SUPERSET_URL: string;
+  SUPERSET_USERNAME: string;
+  SUPERSET_PASSWORD: string;
+  SUPERSET_PROVIDER: string;
 }

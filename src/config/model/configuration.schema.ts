@@ -12,4 +12,9 @@ export const ConfigValidationSchema = Joi.object<EnvValidationInterface>({
   //jwt
   JWT_SECRET: Joi.string().required(),
   JWT_REFRESH_SECRET: Joi.string().required(),
+  //superset
+  SUPERSET_URL: Joi.string().uri().required(),
+  SUPERSET_USERNAME: Joi.string().required(),
+  SUPERSET_PASSWORD: Joi.string().required(),
+  SUPERSET_PROVIDER: Joi.string().required(),
 }).unknown(true);

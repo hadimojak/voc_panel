@@ -1,5 +1,5 @@
 docker compose -f docker-compose-image-tag.yml up -d
-
+docker compose down
 
 ```
 VOC_panel

@@ -43,6 +43,12 @@ export const config = {
     SECRET: validatedEnv.JWT_SECRET,
     REFRESH_SECRET: validatedEnv.JWT_REFRESH_SECRET,
   },
+  superset: {
+    SUPERSET_URL: validatedEnv.SUPERSET_URL,
+    SUPERSET_USERNAME: validatedEnv.SUPERSET_USERNAME,
+    SUPERSET_PASSWORD: validatedEnv.SUPERSET_PASSWORD,
+    SUPERSET_PROVIDER: validatedEnv.SUPERSET_PROVIDER,
+  },
 } as const;
 
 export type AppConfig = typeof config;

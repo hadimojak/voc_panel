@@ -71,8 +71,6 @@ export class UserService {
   }
 
   async updateUser(id: number, dto: UpdateUserDto): Promise<SafeUser> {
-    console.log({ id, dto });
-
     const user = await this.findById(id);
 
     if (!user) {
