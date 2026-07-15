@@ -8,7 +8,7 @@ import { QueryRunner } from 'typeorm';
 
 const admins = [
   { username: 'hadi', password: '123456', role: 0, email: 'test@gmail.com' },
-  { username: 'day', password: 'day123456', role: 0, email: 'test1@gmail.com' },
+  { username: 'day', password: 'day123456', role: 1, email: 'test1@gmail.com' },
 ];
 
 async function createAdmins() {

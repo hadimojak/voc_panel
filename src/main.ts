@@ -24,8 +24,9 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: "http://localhost:1002",
+    origin: 'http://localhost:1002',
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   });
 
   const config = new DocumentBuilder()

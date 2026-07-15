@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 
 export enum UserRole {
+  superAdmin,
   admin,
   user,
 }

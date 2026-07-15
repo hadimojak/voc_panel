@@ -71,6 +71,8 @@ export class UserService {
   }
 
   async updateUser(id: number, dto: UpdateUserDto): Promise<SafeUser> {
+    console.log({ id, dto });
+
     const user = await this.findById(id);
 
     if (!user) {
@@ -125,7 +127,10 @@ export class UserService {
     return this.updateUser(userId, payload);
   }
 
-  private async ensureUsernameIsAvailable(username: string, currentUserId?: number) {
+  private async ensureUsernameIsAvailable(
+    username: string,
+    currentUserId?: number,
+  ) {
     const user = await this.findByUsername(username);
 
     if (user && user.id !== currentUserId) {
