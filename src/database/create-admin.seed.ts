@@ -4,7 +4,7 @@ import { AppDataSource } from './data-source';
 import { UserService } from '../user/user.service';
 import { UserEntity } from '../user/user.entity';
 // 1. Import QueryRunner type
-import { QueryRunner } from 'typeorm'; 
+import { QueryRunner } from 'typeorm';
 
 const admins = [
   { username: 'hadi', password: '123456', role: 0, email: 'test@gmail.com' },
@@ -13,11 +13,11 @@ const admins = [
 
 async function createAdmins() {
   // 2. Explicitly type the variable
-  let queryRunner: QueryRunner | null = null; 
+  let queryRunner: QueryRunner | null = null;
 
   try {
     await AppDataSource.initialize();
-    
+
     queryRunner = AppDataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -46,12 +46,11 @@ async function createAdmins() {
 
     await queryRunner.commitTransaction();
     console.log('Transaction committed successfully.');
-    
+
     // Proper cleanup before exit
     await queryRunner.release();
     await AppDataSource.destroy();
     process.exit(0);
-
   } catch (error) {
     console.error('Admin seed failed');
     console.error(error);

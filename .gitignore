@@ -1,13 +1,3 @@
-Got it. When you ask me to **create a file**, I will:
-
-- Output the **entire file content**
-- In **one block**
-- Ready to **copy–paste directly**
-- No partial snippets or explanations unless you ask.
-
-Here is the **full `.gitignore` file** again as requested.
-
-```gitignore
 # ------------------------------
 # Node.js Dependencies
 # ------------------------------
@@ -103,4 +93,3 @@ docker-compose.override.yml
 src/database/migrations/*.js
 src/database/migrations/*.js.map
 day-ticket-1.json
-```

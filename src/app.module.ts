@@ -12,7 +12,13 @@ import { SupersetController } from './superset/superset.controller';
 import { SupersetService } from './superset/superset.service';
 
 @Module({
-  imports: [ScheduleModule.forRoot(), DatabaseModule, TicketModule, AuthModule, UserModule],
+  imports: [
+    ScheduleModule.forRoot(),
+    DatabaseModule,
+    TicketModule,
+    AuthModule,
+    UserModule,
+  ],
   controllers: [AppController, SupersetController],
   providers: [AppService, TaskService, ConfigService, SupersetService],
 })
