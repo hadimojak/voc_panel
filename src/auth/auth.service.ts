@@ -1,26 +1,16 @@
-import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '../config/config.service';
 import { UserService } from '../user/user.service';
 import { LoginDto } from './dto/login.dto';
-import { SignupDto } from './dto/signup.dto';
-
-type TokenPayload = {
-  sub: number;
-  username: string;
-  tokenVersion: number;
-};
+import type { JwtPayload } from './auth.types';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private userService: UserService,
-    private jwtService: JwtService,
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
   ) {}
 
   // async signup(dto: SignupDto) {
@@ -44,10 +34,11 @@ export class AuthService {
 
     if (!user) throw new UnauthorizedException();
 
-    const isMatch = await bcrypt.compare(dto.password, user.password);
+    const hashedPassword = String(user.password);
+    const isMatch = await bcrypt.compare(dto.password, hashedPassword);
     if (!isMatch) throw new UnauthorizedException();
 
-    const payload: TokenPayload = {
+    const payload: JwtPayload = {
       sub: user.id,
       username: user.username,
       tokenVersion: user.tokenVersion,
@@ -72,16 +63,17 @@ export class AuthService {
   async refresh(userId: number, refreshToken: string) {
     const user = await this.userService.findById(userId);
 
-    if (!user || !user.refreshTokenHash) throw new UnauthorizedException();
+    if (!user?.refreshTokenHash) throw new UnauthorizedException();
+    const refreshTokenHash = user.refreshTokenHash;
 
     const isRefreshTokenValid = await bcrypt.compare(
       refreshToken,
-      user.refreshTokenHash,
+      refreshTokenHash,
     );
 
     if (!isRefreshTokenValid) throw new UnauthorizedException();
 
-    const payload: TokenPayload = {
+    const payload: JwtPayload = {
       sub: user.id,
       username: user.username,
       tokenVersion: user.tokenVersion,
@@ -111,14 +103,17 @@ export class AuthService {
     return { message: 'Logged out successfully' };
   }
 
-  private async generateTokens(payload: TokenPayload) {
+  private async generateTokens(payload: JwtPayload) {
+    const jwtSecret = String(ConfigService.config.jwt.SECRET);
+    const refreshSecret = String(ConfigService.config.jwt.REFRESH_SECRET);
+
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        secret: ConfigService.config.jwt.SECRET,
+        secret: jwtSecret,
         expiresIn: '15m',
       }),
       this.jwtService.signAsync(payload, {
-        secret: ConfigService.config.jwt.REFRESH_SECRET,
+        secret: refreshSecret,
         expiresIn: '7d',
       }),
     ]);

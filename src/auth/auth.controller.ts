@@ -1,6 +1,9 @@
 import { Body, Controller, Get, Post, UseGuards, Req } from '@nestjs/common';
+import type {
+  AuthenticatedRequest,
+  RefreshAuthenticatedRequest,
+} from './auth.types';
 import { AuthService } from './auth.service';
-import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -16,7 +19,7 @@ import {
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
   // @Post('signup')
   // @ApiOperation({ summary: 'Create a new user account' })
@@ -65,7 +68,7 @@ export class AuthController {
     status: 401,
     description: 'Invalid refresh token',
   })
-  refresh(@Req() req: any) {
+  refresh(@Req() req: RefreshAuthenticatedRequest) {
     return this.authService.refresh(req.user.userId, req.user.refreshToken);
   }
 
@@ -86,7 +89,7 @@ export class AuthController {
     status: 401,
     description: 'Unauthorized',
   })
-  logout(@Req() req: any) {
+  logout(@Req() req: AuthenticatedRequest) {
     return this.authService.logout(req.user.userId);
   }
 
@@ -94,7 +97,10 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current authenticated user' })
-  me(@Req() req: any) {
+  me(
+    @Req()
+    req: AuthenticatedRequest,
+  ) {
     return {
       user: {
         id: req.user.userId,
@@ -104,5 +110,5 @@ export class AuthController {
     };
   }
 
-  //ad route for reset password with organization email
+  //add route for reset password with organization email
 }
