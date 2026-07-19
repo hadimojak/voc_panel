@@ -54,4 +54,4 @@ async function bootstrap() {
   await app.listen(port);
   Logger.verbose(`API running on http://localhost:${port}`);
 }
-bootstrap();
+void bootstrap();

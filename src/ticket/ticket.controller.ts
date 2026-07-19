@@ -5,7 +5,6 @@ import {
   HttpStatus,
   Post,
   Query,
-  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -20,13 +19,12 @@ import {
 import type { FastifyReply } from 'fastify';
 import { TicketService } from './ticket.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { TicketEntity } from './ticket.entity';
 import { ExportTicketsDto } from './dto/export-tickets.dto';
 
 @Controller('ticket')
 @ApiTags('Tickets')
 export class TicketController {
-  constructor(private ticketService: TicketService) {}
+  constructor(private readonly ticketService: TicketService) {}
 
   @Get()
   @UseGuards(JwtAuthGuard)
@@ -51,10 +49,9 @@ export class TicketController {
   async getTickets(
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '60',
-    @Req() req: any,
   ) {
-    const pageNumber = parseInt(page, 10) || 1;
-    const limitNumber = parseInt(limit, 10) || 60;
+    const pageNumber = Number.parseInt(page, 10) || 1;
+    const limitNumber = Number.parseInt(limit, 10) || 60;
 
     const result = await this.ticketService.findAll(pageNumber, limitNumber);
     return {

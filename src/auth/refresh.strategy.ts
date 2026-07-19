@@ -1,10 +1,15 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
-import type { Request } from 'express';
 import { ConfigService } from '../config/config.service';
 import { UserService } from '../user/user.service';
 import type { JwtPayload, RefreshAuthenticatedUser } from './auth.types';
+
+type RequestWithHeaders = {
+  headers?: {
+    authorization?: string | string[];
+  };
+};
 
 @Injectable()
 export class RefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
@@ -19,10 +24,13 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
   }
 
   async validate(
-    req: Request,
+    req: RequestWithHeaders,
     payload: JwtPayload,
   ): Promise<RefreshAuthenticatedUser> {
-    const refreshToken = req.get('authorization')?.replace(/^Bearer\s+/i, '');
+    const authorizationHeader = Array.isArray(req.headers?.authorization)
+      ? req.headers.authorization[0]
+      : req.headers?.authorization;
+    const refreshToken = authorizationHeader?.replace(/^Bearer\s+/i, '');
 
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token is missing');

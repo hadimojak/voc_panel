@@ -1,8 +1,8 @@
 import 'reflect-metadata';
 import { AppDataSource } from './data-source';
 import { TicketEntity } from './../ticket/ticket.entity';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { chunk } from 'lodash';
 
 async function seed() {
@@ -15,8 +15,8 @@ async function seed() {
     // const filePath3 = path.resolve(process.cwd(), 'day-ticket-3.json');
     // filePathArr.push(filePath3);
 
-    for (let index = 0; index < filePathArr.length; index++) {
-      const filePath = filePathArr[index];
+    for (const element of filePathArr) {
+      const filePath = element;
       if (!fs.existsSync(filePath)) {
         throw new Error(`Seed file not found: ${filePath}`);
       }
@@ -25,7 +25,7 @@ async function seed() {
       const { tickets } = JSON.parse(raw);
 
       if (!Array.isArray(tickets)) {
-        throw new Error('samplData.json must contain an array of tickets');
+        throw new TypeError('samplData.json must contain an array of tickets');
       }
 
       await AppDataSource.initialize();
@@ -60,4 +60,4 @@ async function seed() {
   }
 }
 
-seed();
+void seed();

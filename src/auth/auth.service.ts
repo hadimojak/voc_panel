@@ -5,6 +5,7 @@ import { ConfigService } from '../config/config.service';
 import { UserService } from '../user/user.service';
 import { LoginDto } from './dto/login.dto';
 import type { JwtPayload } from './auth.types';
+import type { UserEntity } from '../user/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -50,11 +51,7 @@ export class AuthService {
     await this.userService.updateRefreshToken(user.id, refreshHash);
 
     return {
-      user: {
-        email: user.email,
-        username: user.username,
-        role: user.role,
-      },
+      user: this.toAuthUser(user),
       access_token: accessToken,
       refresh_token: refreshToken,
     };
@@ -88,11 +85,7 @@ export class AuthService {
     );
 
     return {
-      user: {
-        email: user.email,
-        username: user.username,
-        role: user.role,
-      },
+      user: this.toAuthUser(user),
       access_token: accessToken,
       refresh_token: newRefreshToken,
     };
@@ -119,5 +112,14 @@ export class AuthService {
     ]);
 
     return { accessToken, refreshToken };
+  }
+
+  private toAuthUser(user: UserEntity) {
+    return {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+    };
   }
 }
