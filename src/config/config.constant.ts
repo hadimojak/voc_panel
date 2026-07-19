@@ -1,7 +1,9 @@
 import * as dotenv from 'dotenv';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { ConfigValidationSchema } from './model/configuration.schema';
+import { ValidationResult } from 'joi';
+import { EnvValidationInterface } from './model/env.validation.interface';
 
 const env = process.env.NODE_ENV || 'dev';
 
@@ -12,20 +14,20 @@ if (fs.existsSync(filePath)) {
   dotenv.config({ path: filePath });
 } else throw new Error(`Environment file ${fileName} not found!`);
 
-const { value: validatedEnv, error } = ConfigValidationSchema.validate(
-  process.env,
-  {
+const validationResult: ValidationResult<EnvValidationInterface> =
+  ConfigValidationSchema.validate(process.env, {
     abortEarly: false,
     stripUnknown: false,
-  },
-);
+  });
 
-if (error) {
-  const errorMessages = error.details
+if (validationResult.error) {
+  const errorMessages = validationResult.error.details
     .map((detail) => `${detail.context?.key}: ${detail.message}`)
     .join(', ');
   throw new Error(`Environment validation failed: ${errorMessages}`);
 }
+
+const validatedEnv = validationResult.value;
 
 export const config = {
   env,
