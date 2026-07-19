@@ -90,6 +90,5 @@ docker-compose.override.yml
 # ------------------------------
 # TypeORM Migration Build Files
 # ------------------------------
-src/database/migrations/*.js
-src/database/migrations/*.js.map
+/migration/*
 day-ticket-1.json
