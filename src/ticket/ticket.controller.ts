@@ -19,7 +19,7 @@ import {
 } from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
 import { TicketService } from './ticket.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { TicketEntity } from './ticket.entity';
 import { ExportTicketsDto } from './dto/export-tickets.dto';
 
