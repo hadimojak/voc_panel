@@ -14,22 +14,6 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  // async signup(dto: SignupDto) {
-  //   const existingUser = await this.userService.findByUsername(dto.username);
-  //   if (existingUser) throw new ConflictException('Username already exists');
-
-  //   const hashedPassword = await bcrypt.hash(dto.password, 10);
-  //   const user = await this.userService.create({
-  //     username: dto.username,
-  //     password: hashedPassword,
-  //   });
-
-  //   return {
-  //     id: user.id,
-  //     username: user.username,
-  //   };
-  // }
-
   async login(dto: LoginDto) {
     const user = await this.userService.findByUsername(dto.username);
 
@@ -60,13 +44,19 @@ export class AuthService {
   async refresh(userId: number, refreshToken: string) {
     const user = await this.userService.findById(userId);
 
-    if (!user?.refreshTokenHash) throw new UnauthorizedException();
-    const refreshTokenHash = user.refreshTokenHash;
+    if (!user?.refreshTokenHash) {
+      throw new UnauthorizedException();
+    }
 
-    const isRefreshTokenValid = await bcrypt.compare(
-      refreshToken,
-      refreshTokenHash,
-    );
+    let isRefreshTokenValid = false;
+    try {
+      isRefreshTokenValid = await bcrypt.compare(
+        refreshToken,
+        user.refreshTokenHash,
+      );
+    } catch {
+      throw new UnauthorizedException();
+    }
 
     if (!isRefreshTokenValid) throw new UnauthorizedException();
 

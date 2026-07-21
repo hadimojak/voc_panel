@@ -38,12 +38,8 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
 
     const user = await this.userService.findById(payload.sub);
 
-    if (!user) {
-      throw new UnauthorizedException('User not found');
-    }
-
-    if (user.tokenVersion !== payload.tokenVersion) {
-      throw new UnauthorizedException('Token version is invalid');
+    if (!user || user.tokenVersion !== payload.tokenVersion) {
+      throw new UnauthorizedException('Invalid refresh token');
     }
 
     return {
