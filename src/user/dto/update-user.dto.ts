@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsEmail,
   IsEnum,
   IsOptional,
@@ -7,14 +8,21 @@ import {
   MinLength,
 } from 'class-validator';
 import { UserRole } from '../user.entity';
+import { IsIranMobile } from '../../common/validators/mobile.validator';
 
 export class UpdateUserDto {
-  @ApiPropertyOptional({ example: 'sahar' })
+  @ApiPropertyOptional({ example: 'سارا احمدی' })
   @IsOptional()
   @IsString()
-  username?: string;
+  fullName?: string;
 
-  @ApiPropertyOptional({ example: 'sahar@example.com' })
+  @ApiPropertyOptional({ example: '09121234567' })
+  @IsOptional()
+  @IsString()
+  @IsIranMobile()
+  mobile?: string;
+
+  @ApiPropertyOptional({ example: 'sara@example.com' })
   @IsOptional()
   @IsEmail()
   email?: string;
@@ -25,8 +33,18 @@ export class UpdateUserDto {
   @MinLength(6)
   password?: string;
 
-  @ApiPropertyOptional({ enum: UserRole, example: UserRole.user })
+  @ApiPropertyOptional({ enum: UserRole, example: UserRole.agent })
   @IsOptional()
   @IsEnum(UserRole)
   role?: UserRole;
+
+  @ApiPropertyOptional({ example: 'ارزیابی جبران' })
+  @IsOptional()
+  @IsString()
+  team?: string;
+
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean;
 }

@@ -1,22 +1,29 @@
 import type { Request } from 'express';
 import type { UserRole } from '../user/user.entity';
 
+export type AuthUser = {
+  id: string;
+  fullName: string;
+  mobile: string;
+  role: UserRole;
+};
+
 export type JwtPayload = {
   sub: number;
-  username: string;
+  mobile: string;
   tokenVersion: number;
 };
 
 export type AuthenticatedUser = {
   userId: number;
-  username: string;
-  email: string | null;
+  fullName: string;
+  mobile: string;
   role: UserRole;
 };
 
 export type RefreshAuthenticatedUser = {
   userId: number;
-  username: string;
+  mobile: string;
   refreshToken: string;
 };
 

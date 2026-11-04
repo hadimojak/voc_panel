@@ -2,17 +2,37 @@ import 'reflect-metadata';
 import * as bcrypt from 'bcrypt';
 import { AppDataSource } from './data-source';
 import { UserService } from '../user/user.service';
-import { UserEntity } from '../user/user.entity';
-// 1. Import QueryRunner type
+import { UserEntity, UserRole } from '../user/user.entity';
 import { QueryRunner } from 'typeorm';
 
-const admins = [
-  { username: 'hadi', password: '123456', role: 0, email: 'test@gmail.com' },
-  { username: 'day', password: 'day123456', role: 1, email: 'test1@gmail.com' },
+const seedUsers = [
+  {
+    fullName: 'مدیر سیستم',
+    mobile: '09120000001',
+    password: '123456',
+    role: UserRole.admin,
+    email: 'admin@example.com',
+    team: 'HQ',
+  },
+  {
+    fullName: 'علی رضایی',
+    mobile: '09120000002',
+    password: '123456',
+    role: UserRole.supervisor,
+    email: 'supervisor@example.com',
+    team: 'ارزیابی جبران',
+  },
+  {
+    fullName: 'سارا احمدی',
+    mobile: '09120000003',
+    password: '123456',
+    role: UserRole.agent,
+    email: 'agent@example.com',
+    team: 'ارزیابی جبران',
+  },
 ];
 
 async function createAdmins() {
-  // 2. Explicitly type the variable
   let queryRunner: QueryRunner | null = null;
 
   try {
@@ -22,32 +42,35 @@ async function createAdmins() {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    // 3. Pass the repository from the transactional manager
     const userService = new UserService(
       queryRunner.manager.getRepository(UserEntity),
     );
 
-    for (const admin of admins) {
-      const existingUser = await userService.findByUsername(admin.username);
+    for (const seed of seedUsers) {
+      const existingUser = await userService.findByMobile(seed.mobile);
       if (existingUser) {
-        console.log(`Admin "${admin.username}" already exists, skipping`);
+        console.log(`User "${seed.mobile}" already exists, skipping`);
         continue;
       }
 
-      const hashedPassword = await bcrypt.hash(admin.password, 10);
+      const hashedPassword = await bcrypt.hash(seed.password, 10);
       await userService.create({
-        username: admin.username,
+        fullName: seed.fullName,
+        mobile: seed.mobile,
         password: hashedPassword,
-        role: admin.role,
-        email: admin.email,
+        role: seed.role,
+        email: seed.email,
+        team: seed.team,
+        active: true,
       });
-      console.log(`Admin "${admin.username}" created successfully`);
+      console.log(
+        `User "${seed.fullName}" (${seed.role}) created: ${seed.mobile}`,
+      );
     }
 
     await queryRunner.commitTransaction();
     console.log('Transaction committed successfully.');
 
-    // Proper cleanup before exit
     await queryRunner.release();
     await AppDataSource.destroy();
     process.exit(0);

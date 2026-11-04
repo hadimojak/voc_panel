@@ -81,7 +81,9 @@ export class TicketService {
       { header: 'Sub Ticket', key: 'subticket', width: 15 },
       { header: 'Request Type', key: 'reqtypeticket', width: 15 },
       { header: 'Created Time', key: 'createdtime', width: 22 },
+      { header: 'Modified Time', key: 'modifiedtime', width: 22 },
       { header: 'Ticket Type', key: 'tickettype', width: 12 },
+      { header: 'Input Channel', key: 'inputchannel', width: 12 },
       { header: 'Complaint Text', key: 'complainttext', width: 30 },
       { header: 'Main Complaint', key: 'maincomplaint', width: 20 },
       { header: 'Status', key: 'complaintstatus', width: 12 },
@@ -112,7 +114,11 @@ export class TicketService {
         createdtime: ticket.createdtime
           ? new Date(ticket.createdtime).toLocaleString('fa-IR')
           : '',
+        modifiedtime: ticket.modifiedtime
+          ? new Date(ticket.modifiedtime).toLocaleString('fa-IR')
+          : '',
         tickettype: ticket.tickettype || '',
+        inputchannel: ticket.inputchannel || '',
         complainttext: ticket.complainttext || '',
         maincomplaint: ticket.maincomplaint || '',
         complaintstatus: ticket.complaintstatus || '',

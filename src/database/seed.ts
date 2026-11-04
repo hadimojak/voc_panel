@@ -42,7 +42,15 @@ async function seed() {
           ...ticket,
           closeddate: ticket.closeddate === '' ? null : ticket.closeddate,
           createdtime: ticket.createdtime === '' ? null : ticket.createdtime,
+          modifiedtime:
+            ticket.modifiedtime === '' ? null : ticket.modifiedtime,
           accountname: ticket.accountname === '' ? null : ticket.accountname,
+          inputchannel:
+            ticket.inputchannel === '' ? null : ticket.inputchannel,
+          finalanswer: ticket.finalanswer === '' ? null : ticket.finalanswer,
+          description: ticket.description === '' ? null : ticket.description,
+          mainrequest: ticket.mainrequest === '' ? null : ticket.mainrequest,
+          mainoffer: ticket.mainoffer === '' ? null : ticket.mainoffer,
         }));
 
         await repo.insert(sanitizedBatch);

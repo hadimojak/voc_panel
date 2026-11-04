@@ -38,13 +38,13 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
 
     const user = await this.userService.findById(payload.sub);
 
-    if (!user || user.tokenVersion !== payload.tokenVersion) {
+    if (!user || !user.active || user.tokenVersion !== payload.tokenVersion) {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
     return {
       userId: payload.sub,
-      username: payload.username,
+      mobile: user.mobile,
       refreshToken,
     };
   }

@@ -24,16 +24,23 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: 'http://localhost:5002',
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:5002',
+      'http://localhost:5173',
+    ],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
 
   const config = new DocumentBuilder()
     .setTitle('VOC Panel API')
     .setDescription('API documentation for VOC Panel')
     .setVersion('1.0')
+    .addBearerAuth()
     .addTag('tickets')
+    .addTag('Auth')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -42,11 +49,9 @@ async function bootstrap() {
   try {
     const dataSource = app.get(DataSource);
     await dataSource.query('SELECT 1');
-
-    console.log('db connected');
+    Logger.log('Postgres connected');
   } catch (error) {
-    console.error('db connection failed');
-    console.error(error);
+    Logger.error('Postgres connection failed', error);
     await app.close();
     process.exit(1);
   }

@@ -41,8 +41,14 @@ export class TicketEntity {
   @Column({ type: 'timestamp', nullable: true })
   createdtime!: Date;
 
+  @Column({ type: 'timestamp', nullable: true })
+  modifiedtime!: Date | null;
+
   @Column({ type: 'varchar', nullable: true })
   tickettype!: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  inputchannel!: string | null;
 
   @Column({ type: 'text', nullable: true })
   complainttext!: string;

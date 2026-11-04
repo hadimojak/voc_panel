@@ -8,6 +8,8 @@ import { DatabaseModule } from './database/database.module';
 import { TicketModule } from './ticket/ticket.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { RedisModule } from './redis/redis.module';
+import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
 import { SupersetController } from './superset/superset.controller';
 import { SupersetService } from './superset/superset.service';
 
@@ -15,6 +17,8 @@ import { SupersetService } from './superset/superset.service';
   imports: [
     ScheduleModule.forRoot(),
     DatabaseModule,
+    RedisModule,
+    RabbitmqModule,
     TicketModule,
     AuthModule,
     UserModule,

@@ -1,15 +1,26 @@
-// src/auth/dto/signup.dto.ts
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
+import { UserRole } from '../../user/user.entity';
+import { IsIranMobile } from '../../common/validators/mobile.validator';
 
 export class SignupDto {
-  @ApiProperty({
-    description: 'Unique username for the account',
-    example: 'hadi',
-  })
+  @ApiProperty({ example: 'سارا احمدی' })
   @IsNotEmpty()
   @IsString()
-  username!: string;
+  fullName!: string;
+
+  @ApiProperty({ example: '09121234567' })
+  @IsNotEmpty()
+  @IsString()
+  @IsIranMobile()
+  mobile!: string;
 
   @ApiProperty({
     description: 'Password must be at least 6 characters long',
@@ -20,4 +31,19 @@ export class SignupDto {
   @IsString()
   @MinLength(6)
   password!: string;
+
+  @ApiPropertyOptional({ example: 'sara@example.com' })
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @ApiPropertyOptional({ enum: UserRole, example: UserRole.agent })
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole;
+
+  @ApiPropertyOptional({ example: 'ارزیابی جبران' })
+  @IsOptional()
+  @IsString()
+  team?: string;
 }

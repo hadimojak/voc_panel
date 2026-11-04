@@ -33,16 +33,16 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  @Roles(UserRole.superAdmin, UserRole.admin)
-  @ApiOperation({ summary: 'Get all users' })
+  @Roles(UserRole.admin)
+  @ApiOperation({ summary: 'List staff users (admin.manage)' })
   @ApiResponse({ status: 200, description: 'Users returned successfully' })
   findAll() {
     return this.userService.findAll();
   }
 
   @Get(':id')
-  @Roles(UserRole.superAdmin, UserRole.admin)
-  @ApiOperation({ summary: 'Get user by id' })
+  @Roles(UserRole.admin)
+  @ApiOperation({ summary: 'Get staff user by id' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'User returned successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
@@ -51,29 +51,29 @@ export class UserController {
   }
 
   @Post()
-  @Roles(UserRole.superAdmin)
-  @ApiOperation({ summary: 'Create user' })
+  @Roles(UserRole.admin)
+  @ApiOperation({ summary: 'Create staff user' })
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({ status: 201, description: 'User created successfully' })
-  @ApiResponse({ status: 409, description: 'Username or email already exists' })
+  @ApiResponse({ status: 409, description: 'Mobile or email already exists' })
   create(@Body() dto: CreateUserDto) {
     return this.userService.createUser(dto);
   }
 
   @Patch(':id')
-  @Roles(UserRole.superAdmin)
-  @ApiOperation({ summary: 'Update user' })
+  @Roles(UserRole.admin)
+  @ApiOperation({ summary: 'Update staff user' })
   @ApiParam({ name: 'id', type: Number })
   @ApiBody({ type: UpdateUserDto })
   @ApiResponse({ status: 200, description: 'User updated successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  @ApiResponse({ status: 409, description: 'Username or email already exists' })
+  @ApiResponse({ status: 409, description: 'Mobile or email already exists' })
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateUserDto) {
     return this.userService.updateUser(id, dto);
   }
 
   @Patch(':id/role')
-  @Roles(UserRole.superAdmin)
+  @Roles(UserRole.admin)
   @ApiOperation({ summary: 'Update user role' })
   @ApiParam({ name: 'id', type: Number })
   @ApiBody({ type: UpdateUserDto })
@@ -83,12 +83,12 @@ export class UserController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateUserDto,
   ) {
-    return this.userService.updateUser(id, dto);
+    return this.userService.updateUser(id, { role: dto.role });
   }
 
   @Delete(':id')
-  @Roles(UserRole.superAdmin)
-  @ApiOperation({ summary: 'Delete user' })
+  @Roles(UserRole.admin)
+  @ApiOperation({ summary: 'Delete staff user' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'User deleted successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })

@@ -21,27 +21,13 @@ import {
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // @Post('signup')
-  // @ApiOperation({ summary: 'Create a new user account' })
-  // @ApiBody({ type: SignupDto })
-  // @ApiResponse({
-  //   status: 201,
-  //   description: 'User successfully created',
-  // })
-  // @ApiResponse({
-  //   status: 400,
-  //   description: 'Invalid input data',
-  // })
-  // signup(@Body() dto: SignupDto) {
-  //   return this.authService.signup(dto);
-  // }
-
   @Post('login')
-  @ApiOperation({ summary: 'User login and receive tokens' })
+  @ApiOperation({ summary: 'Sign in with mobile and password' })
   @ApiBody({ type: LoginDto })
   @ApiResponse({
     status: 200,
-    description: 'Login successful, returns access and refresh tokens',
+    description:
+      'Login successful. Returns user { id, fullName, mobile, role } plus tokens',
   })
   @ApiResponse({
     status: 401,
@@ -62,7 +48,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Refresh access token using refresh token' })
   @ApiResponse({
     status: 200,
-    description: 'New access token generated',
+    description: 'New access and refresh tokens generated',
   })
   @ApiResponse({
     status: 401,
@@ -80,7 +66,7 @@ export class AuthController {
     description: 'Access token in the format: Bearer <token>',
     required: true,
   })
-  @ApiOperation({ summary: 'Logout user and revoke refresh token' })
+  @ApiOperation({ summary: 'Sign out and revoke refresh token' })
   @ApiResponse({
     status: 200,
     description: 'User logged out successfully',
@@ -96,20 +82,18 @@ export class AuthController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get current authenticated user' })
-  me(
-    @Req()
-    req: AuthenticatedRequest,
-  ) {
-    return {
-      user: {
-        id: req.user.userId,
-        username: req.user.username,
-        email: req.user.email,
-        role: req.user.role,
-      },
-    };
+  @ApiOperation({
+    summary: 'Current session user (id, fullName, mobile, role)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Authenticated user profile',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized — treat as logged out',
+  })
+  me(@Req() req: AuthenticatedRequest) {
+    return this.authService.me(req.user.userId);
   }
-
-  //add route for reset password with organization email
 }
