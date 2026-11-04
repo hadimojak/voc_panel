@@ -17,6 +17,8 @@ export enum TicketType {
   Conversation = 'گفت‌وگو',
   Connection = 'ارتباط‌دهی',
   Complaint = 'شکایت',
+  /** CRM plural label seen in exports (same module as شکایت). */
+  Complaints = 'شکایات',
   FollowUp = 'پیگیری',
   Request = 'درخواست',
   Suggestion = 'پیشنهاد',
