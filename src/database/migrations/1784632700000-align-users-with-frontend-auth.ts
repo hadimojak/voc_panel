@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AlignUsersWithFrontendAuth1784632700000
-  implements MigrationInterface
-{
+export class AlignUsersWithFrontendAuth1784632700000 implements MigrationInterface {
   name = 'AlignUsersWithFrontendAuth1784632700000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -11,7 +9,9 @@ export class AlignUsersWithFrontendAuth1784632700000
     await queryRunner.query(
       `ALTER TABLE "users" DROP CONSTRAINT IF EXISTS "UQ_fe0bb3f6520ee0469504521e710"`,
     );
-    await queryRunner.query(`ALTER TABLE "users" DROP COLUMN IF EXISTS "username"`);
+    await queryRunner.query(
+      `ALTER TABLE "users" DROP COLUMN IF EXISTS "username"`,
+    );
 
     await queryRunner.query(
       `ALTER TABLE "users" ADD "fullName" character varying NOT NULL DEFAULT ''`,
@@ -25,9 +25,7 @@ export class AlignUsersWithFrontendAuth1784632700000
     await queryRunner.query(
       `ALTER TABLE "users" ADD "active" boolean NOT NULL DEFAULT true`,
     );
-    await queryRunner.query(
-      `ALTER TABLE "users" ADD "lastLoginAt" TIMESTAMP`,
-    );
+    await queryRunner.query(`ALTER TABLE "users" ADD "lastLoginAt" TIMESTAMP`);
 
     await queryRunner.query(`
       ALTER TABLE "users"
@@ -60,11 +58,19 @@ export class AlignUsersWithFrontendAuth1784632700000
     await queryRunner.query(
       `ALTER TABLE "users" DROP CONSTRAINT IF EXISTS "UQ_users_mobile"`,
     );
-    await queryRunner.query(`ALTER TABLE "users" DROP COLUMN IF EXISTS "lastLoginAt"`);
-    await queryRunner.query(`ALTER TABLE "users" DROP COLUMN IF EXISTS "active"`);
+    await queryRunner.query(
+      `ALTER TABLE "users" DROP COLUMN IF EXISTS "lastLoginAt"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "users" DROP COLUMN IF EXISTS "active"`,
+    );
     await queryRunner.query(`ALTER TABLE "users" DROP COLUMN IF EXISTS "team"`);
-    await queryRunner.query(`ALTER TABLE "users" DROP COLUMN IF EXISTS "mobile"`);
-    await queryRunner.query(`ALTER TABLE "users" DROP COLUMN IF EXISTS "fullName"`);
+    await queryRunner.query(
+      `ALTER TABLE "users" DROP COLUMN IF EXISTS "mobile"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "users" DROP COLUMN IF EXISTS "fullName"`,
+    );
 
     await queryRunner.query(
       `ALTER TABLE "users" ADD "username" character varying`,

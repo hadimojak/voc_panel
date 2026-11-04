@@ -25,7 +25,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     });
 
     await this.client.connect();
-    const pong = await this.client.ping();
+    const pong: string = await this.client.ping();
     if (pong !== 'PONG') {
       throw new Error(`Unexpected Redis ping response: ${pong}`);
     }

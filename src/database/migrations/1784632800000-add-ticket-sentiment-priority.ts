@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddTicketSentimentPriority1784632800000
-  implements MigrationInterface
-{
+export class AddTicketSentimentPriority1784632800000 implements MigrationInterface {
   name = 'AddTicketSentimentPriority1784632800000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

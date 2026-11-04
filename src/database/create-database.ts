@@ -28,4 +28,4 @@ async function createDatabase() {
   await client.end();
 }
 
-createDatabase();
+void createDatabase();

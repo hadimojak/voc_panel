@@ -20,7 +20,8 @@ export class IsOpenEnumConstraint implements ValidatorConstraintInterface {
   }
 
   defaultMessage(args: ValidationArguments) {
-    const enumObject = args.constraints[0] as Record<string, string> | undefined;
+    const enumObject = args.constraints[0] as
+      Record<string, string> | undefined;
     const known = enumObject ? openEnumValues(enumObject).join(', ') : '';
     return known
       ? `${args.property} must be a string (known values include: ${known})`

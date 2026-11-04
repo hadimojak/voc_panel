@@ -51,9 +51,16 @@ async function seed() {
       }
 
       const raw = fs.readFileSync(filePath, 'utf8');
-      const { tickets } = JSON.parse(raw);
+      const parsed: unknown = JSON.parse(raw);
+      const tickets =
+        parsed &&
+        typeof parsed === 'object' &&
+        'tickets' in parsed &&
+        Array.isArray(parsed.tickets)
+          ? (parsed as { tickets: unknown[] }).tickets
+          : null;
 
-      if (!Array.isArray(tickets)) {
+      if (!tickets) {
         throw new TypeError('samplData.json must contain an array of tickets');
       }
 

@@ -23,7 +23,7 @@ export function normalizeOpenEnumValue<T extends string>(
   value: unknown,
 ): OpenEnum<T> | null {
   if (value === null || value === undefined) return null;
-  if (typeof value !== 'string') return String(value) as OpenEnum<T>;
+  if (typeof value !== 'string') return null;
   const trimmed = value.trim();
-  return trimmed === '' ? null : (trimmed as OpenEnum<T>);
+  return trimmed === '' ? null : trimmed;
 }

@@ -32,7 +32,7 @@ export class TicketService {
       const next: Partial<TicketEntity> = { ...ticket };
       for (const field of OPEN_ENUM_FIELDS) {
         if (next[field] !== undefined) {
-          next[field] = normalizeOpenEnumValue(next[field]) as never;
+          next[field] = normalizeOpenEnumValue(next[field]);
         }
       }
       return next;

@@ -2,6 +2,18 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import axios, { AxiosInstance } from 'axios';
 import { ConfigService } from '../config/config.service';
 
+type SupersetLoginResponse = {
+  access_token?: string;
+};
+
+type SupersetCsrfResponse = {
+  result?: string;
+};
+
+type SupersetGuestTokenResponse = {
+  token?: string;
+};
+
 @Injectable()
 export class SupersetService {
   private readonly supersetUrl = ConfigService.config.superset.SUPERSET_URL;
@@ -32,7 +44,7 @@ export class SupersetService {
   async getAccessToken(): Promise<{ accessToken: string; cookies: string }> {
     const client = this.createClient();
 
-    const response = await client.post(
+    const response = await client.post<SupersetLoginResponse>(
       '/api/v1/security/login',
       {
         username: this.username,
@@ -47,7 +59,7 @@ export class SupersetService {
       },
     );
 
-    const accessToken = response.data?.access_token;
+    const accessToken = response.data.access_token;
     const cookies = this.extractCookies(response.headers['set-cookie']);
 
     if (!accessToken) {
@@ -61,13 +73,16 @@ export class SupersetService {
     const { accessToken, cookies: loginCookies } = await this.getAccessToken();
 
     const csrfClient = this.createClient(loginCookies);
-    const csrfResponse = await csrfClient.get('/api/v1/security/csrf_token/', {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+    const csrfResponse = await csrfClient.get<SupersetCsrfResponse>(
+      '/api/v1/security/csrf_token/',
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       },
-    });
+    );
 
-    const csrfToken = csrfResponse.data?.result;
+    const csrfToken = csrfResponse.data.result;
     const csrfCookies = this.extractCookies(csrfResponse.headers['set-cookie']);
     const mergedCookies = this.mergeCookies(loginCookies, csrfCookies);
 
@@ -78,7 +93,7 @@ export class SupersetService {
     }
 
     const guestClient = this.createClient(mergedCookies);
-    const response = await guestClient.post(
+    const response = await guestClient.post<SupersetGuestTokenResponse>(
       '/api/v1/security/guest_token/',
       {
         resources: [
@@ -104,7 +119,7 @@ export class SupersetService {
       },
     );
 
-    const guestToken = response.data?.token;
+    const guestToken = response.data.token;
 
     if (!guestToken) {
       throw new InternalServerErrorException(

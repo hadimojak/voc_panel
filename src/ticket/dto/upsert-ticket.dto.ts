@@ -39,7 +39,10 @@ export class UpsertTicketDto {
   @IsOpenEnum(TicketStatus)
   complaintstatus?: string | null;
 
-  @ApiPropertyOptional({ enum: MainComplaintType, description: 'نوع اصلی شکایت' })
+  @ApiPropertyOptional({
+    enum: MainComplaintType,
+    description: 'نوع اصلی شکایت',
+  })
   @IsOptional()
   @Transform(toOpenEnumOrNull)
   @IsOpenEnum(MainComplaintType)
