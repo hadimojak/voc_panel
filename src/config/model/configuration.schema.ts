@@ -10,6 +10,16 @@ export const ConfigValidationSchema: Joi.ObjectSchema<EnvValidationInterface> =
     POSTGRES_DB: Joi.string().required(),
     POSTGRES_USER: Joi.string().alphanum().min(3).required(),
     POSTGRES_PASSWORD: Joi.string().min(6).required(),
+    //redis
+    REDIS_HOST: Joi.string().hostname().required(),
+    REDIS_PORT: Joi.number().port().default(6379),
+    REDIS_PASSWORD: Joi.string().min(1).required(),
+    //rabbitmq
+    RABBITMQ_HOST: Joi.string().hostname().required(),
+    RABBITMQ_PORT: Joi.number().port().default(5672),
+    RABBITMQ_USER: Joi.string().required(),
+    RABBITMQ_PASSWORD: Joi.string().min(1).required(),
+    RABBITMQ_VHOST: Joi.string().default('/'),
     //jwt
     JWT_SECRET: Joi.string().required(),
     JWT_REFRESH_SECRET: Joi.string().required(),

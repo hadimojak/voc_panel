@@ -6,6 +6,17 @@ export interface EnvValidationInterface {
   POSTGRES_DB: string;
   POSTGRES_USER: string;
   POSTGRES_PASSWORD: string;
+
+  REDIS_HOST: string;
+  REDIS_PORT: number;
+  REDIS_PASSWORD: string;
+
+  RABBITMQ_HOST: string;
+  RABBITMQ_PORT: number;
+  RABBITMQ_USER: string;
+  RABBITMQ_PASSWORD: string;
+  RABBITMQ_VHOST: string;
+
   JWT_SECRET: string;
   JWT_REFRESH_SECRET: string;
 

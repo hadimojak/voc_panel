@@ -41,6 +41,18 @@ export const config = {
     POSTGRES_USER: validatedEnv.POSTGRES_USER,
     POSTGRES_PASSWORD: validatedEnv.POSTGRES_PASSWORD,
   },
+  redis: {
+    REDIS_HOST: validatedEnv.REDIS_HOST,
+    REDIS_PORT: validatedEnv.REDIS_PORT,
+    REDIS_PASSWORD: validatedEnv.REDIS_PASSWORD,
+  },
+  rabbitmq: {
+    RABBITMQ_HOST: validatedEnv.RABBITMQ_HOST,
+    RABBITMQ_PORT: validatedEnv.RABBITMQ_PORT,
+    RABBITMQ_USER: validatedEnv.RABBITMQ_USER,
+    RABBITMQ_PASSWORD: validatedEnv.RABBITMQ_PASSWORD,
+    RABBITMQ_VHOST: validatedEnv.RABBITMQ_VHOST,
+  },
   jwt: {
     SECRET: validatedEnv.JWT_SECRET,
     REFRESH_SECRET: validatedEnv.JWT_REFRESH_SECRET,
