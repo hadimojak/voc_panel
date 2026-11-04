@@ -7,6 +7,18 @@ import { TicketEntity } from './ticket.entity';
 import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as ExcelJS from 'exceljs';
+import { normalizeOpenEnumValue } from '../common/types/open-enum';
+
+const OPEN_ENUM_FIELDS = [
+  'tickettype',
+  'complaintstatus',
+  'maincomplaint',
+  'mainticket',
+  'subticket',
+  'reqtypeticket',
+  'sentiment',
+  'priority',
+] as const;
 
 @Injectable()
 export class TicketService {
@@ -16,7 +28,16 @@ export class TicketService {
   ) {}
 
   async saveMany(tickets: Partial<TicketEntity>[]) {
-    await this.ticketRepo.upsert(tickets, ['ticketid']);
+    const normalized = tickets.map((ticket) => {
+      const next: Partial<TicketEntity> = { ...ticket };
+      for (const field of OPEN_ENUM_FIELDS) {
+        if (next[field] !== undefined) {
+          next[field] = normalizeOpenEnumValue(next[field]) as never;
+        }
+      }
+      return next;
+    });
+    await this.ticketRepo.upsert(normalized, ['ticketid']);
   }
 
   async findLastTicket(): Promise<TicketEntity | null> {
@@ -87,6 +108,8 @@ export class TicketService {
       { header: 'Complaint Text', key: 'complainttext', width: 30 },
       { header: 'Main Complaint', key: 'maincomplaint', width: 20 },
       { header: 'Status', key: 'complaintstatus', width: 12 },
+      { header: 'Sentiment', key: 'sentiment', width: 12 },
+      { header: 'Priority', key: 'priority', width: 12 },
       { header: 'Final Answer', key: 'finalanswer', width: 30 },
       { header: 'Closed Date', key: 'closeddate', width: 22 },
       { header: 'Description', key: 'description', width: 30 },
@@ -122,6 +145,8 @@ export class TicketService {
         complainttext: ticket.complainttext || '',
         maincomplaint: ticket.maincomplaint || '',
         complaintstatus: ticket.complaintstatus || '',
+        sentiment: ticket.sentiment || '',
+        priority: ticket.priority || '',
         finalanswer: ticket.finalanswer || '',
         closeddate: ticket.closeddate
           ? new Date(ticket.closeddate).toLocaleString('fa-IR')

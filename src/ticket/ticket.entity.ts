@@ -1,4 +1,14 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
+import type { OpenEnum } from '../common/types/open-enum';
+import {
+  ComplaintCause,
+  ComplaintType,
+  MainComplaintType,
+  TicketPriority,
+  TicketSentiment,
+  TicketStatus,
+  TicketType,
+} from './enums/ticket.enums';
 
 @Entity('tickets')
 export class TicketEntity {
@@ -6,67 +16,73 @@ export class TicketEntity {
   ticketid!: string;
 
   @Column({ type: 'varchar', nullable: true })
-  ticket_no!: string;
+  ticket_no!: string | null;
 
   @Column({ type: 'varchar', nullable: true })
-  nationalcode!: string;
+  nationalcode!: string | null;
 
   @Column({ type: 'varchar', nullable: true })
-  accountname!: string;
+  accountname!: string | null;
 
   @Column({ type: 'varchar', nullable: true })
-  fname!: string;
+  fname!: string | null;
 
   @Column({ type: 'varchar', nullable: true })
-  lname!: string;
+  lname!: string | null;
 
   @Column({ type: 'varchar', nullable: true })
-  mobile!: string;
+  mobile!: string | null;
 
   @Column({ type: 'varchar', nullable: true })
-  productname!: string;
+  productname!: string | null;
 
   @Column({ type: 'varchar', nullable: true })
-  branchname!: string;
+  branchname!: string | null;
 
+  /** Parallel subject level1 (call / general taxonomy). Stored as varchar. */
   @Column({ type: 'varchar', nullable: true })
-  mainticket!: string;
+  mainticket!: OpenEnum<MainComplaintType> | null;
 
+  /** نوع شکایت (subject level2). Stored as varchar — unknown CRM values allowed. */
   @Column({ type: 'varchar', nullable: true })
-  subticket!: string;
+  subticket!: OpenEnum<ComplaintType> | null;
 
+  /** علت شکایت (subject level3). Stored as varchar — unknown CRM values allowed. */
   @Column({ type: 'varchar', nullable: true })
-  reqtypeticket!: string;
+  reqtypeticket!: OpenEnum<ComplaintCause> | null;
 
   @Column({ type: 'timestamp', nullable: true })
-  createdtime!: Date;
+  createdtime!: Date | null;
 
   @Column({ type: 'timestamp', nullable: true })
   modifiedtime!: Date | null;
 
+  /** نوع تیکت. Stored as varchar — unknown CRM values allowed. */
   @Column({ type: 'varchar', nullable: true })
-  tickettype!: string;
+  tickettype!: OpenEnum<TicketType> | null;
 
   @Column({ type: 'varchar', nullable: true })
   inputchannel!: string | null;
 
   @Column({ type: 'text', nullable: true })
-  complainttext!: string;
+  complainttext!: string | null;
 
+  /** نوع اصلی شکایت (subject level1). Stored as varchar — unknown CRM values allowed. */
   @Column({ type: 'varchar', nullable: true })
-  maincomplaint!: string;
+  maincomplaint!: OpenEnum<MainComplaintType> | null;
 
+  /** وضعیت. Stored as varchar — unknown CRM values allowed. */
   @Column({ type: 'varchar', nullable: true })
-  complaintstatus!: string;
+  complaintstatus!: OpenEnum<TicketStatus> | null;
 
   @Column({ type: 'text', nullable: true })
-  finalanswer!: string;
+  finalanswer!: string | null;
 
   @Column({ type: 'date', nullable: true })
-  closeddate!: string;
+  closeddate!: string | null;
 
   @Column({ type: 'text', nullable: true })
-  description!: string;
+  description!: string | null;
 
   @Column({ type: 'varchar', nullable: true })
   mainrequest!: string | null;
@@ -75,11 +91,19 @@ export class TicketEntity {
   mainoffer!: string | null;
 
   @Column({ type: 'varchar', nullable: true })
-  ownername!: string;
+  ownername!: string | null;
+
+  /** احساس (SMART). Stored as varchar — unknown values allowed. */
+  @Column({ type: 'varchar', nullable: true })
+  sentiment!: OpenEnum<TicketSentiment> | null;
+
+  /** اولویت (SMART). Stored as varchar — unknown values allowed. */
+  @Column({ type: 'varchar', nullable: true })
+  priority!: OpenEnum<TicketPriority> | null;
 
   @Column({ type: 'double precision', nullable: true })
-  lat?: number;
+  lat?: number | null;
 
   @Column({ type: 'double precision', nullable: true })
-  lng?: number;
+  lng?: number | null;
 }

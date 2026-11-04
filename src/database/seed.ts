@@ -4,6 +4,35 @@ import { TicketEntity } from './../ticket/ticket.entity';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { chunk } from 'lodash';
+import { normalizeOpenEnumValue } from '../common/types/open-enum';
+
+/** Empty strings → null; open-enum fields keep unknown CRM values as-is. */
+function sanitizeTicket(ticket: Record<string, unknown>) {
+  const emptyToNull = (value: unknown) =>
+    value === '' ? null : (value as string | null | undefined);
+
+  return {
+    ...ticket,
+    closeddate: emptyToNull(ticket.closeddate),
+    createdtime: emptyToNull(ticket.createdtime),
+    modifiedtime: emptyToNull(ticket.modifiedtime),
+    accountname: emptyToNull(ticket.accountname),
+    inputchannel: emptyToNull(ticket.inputchannel),
+    finalanswer: emptyToNull(ticket.finalanswer),
+    description: emptyToNull(ticket.description),
+    mainrequest: emptyToNull(ticket.mainrequest),
+    mainoffer: emptyToNull(ticket.mainoffer),
+    // Open enums: never drop unknown values — only normalize blanks.
+    tickettype: normalizeOpenEnumValue(ticket.tickettype),
+    complaintstatus: normalizeOpenEnumValue(ticket.complaintstatus),
+    maincomplaint: normalizeOpenEnumValue(ticket.maincomplaint),
+    mainticket: normalizeOpenEnumValue(ticket.mainticket),
+    subticket: normalizeOpenEnumValue(ticket.subticket),
+    reqtypeticket: normalizeOpenEnumValue(ticket.reqtypeticket),
+    sentiment: normalizeOpenEnumValue(ticket.sentiment),
+    priority: normalizeOpenEnumValue(ticket.priority),
+  };
+}
 
 async function seed() {
   try {
@@ -38,20 +67,9 @@ async function seed() {
       const chunks = chunk(tickets, chunkSize);
 
       for (const batch of chunks) {
-        const sanitizedBatch = batch.map((ticket) => ({
-          ...ticket,
-          closeddate: ticket.closeddate === '' ? null : ticket.closeddate,
-          createdtime: ticket.createdtime === '' ? null : ticket.createdtime,
-          modifiedtime:
-            ticket.modifiedtime === '' ? null : ticket.modifiedtime,
-          accountname: ticket.accountname === '' ? null : ticket.accountname,
-          inputchannel:
-            ticket.inputchannel === '' ? null : ticket.inputchannel,
-          finalanswer: ticket.finalanswer === '' ? null : ticket.finalanswer,
-          description: ticket.description === '' ? null : ticket.description,
-          mainrequest: ticket.mainrequest === '' ? null : ticket.mainrequest,
-          mainoffer: ticket.mainoffer === '' ? null : ticket.mainoffer,
-        }));
+        const sanitizedBatch = batch.map((ticket) =>
+          sanitizeTicket(ticket as Record<string, unknown>),
+        );
 
         await repo.insert(sanitizedBatch);
       }
