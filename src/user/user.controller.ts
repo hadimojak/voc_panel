@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -18,30 +19,40 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from './guards/userRole.guard';
-import { Roles } from './guards/userRole.decorator';
-import { UserRole } from './user.entity';
+import { RequirePermissions } from '../rbac/permissions.decorator';
+import { PermissionsGuard } from '../rbac/permissions.guard';
 import { CreateUserDto } from './dto/create-user.dto';
+import { ListUsersDto } from './dto/list-users.dto';
+import { SetUserActiveDto } from './dto/set-user-active.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
 
 @Controller('user')
 @ApiTags('Users')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
+@RequirePermissions('admin.manage')
 @ApiBearerAuth()
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  @Roles(UserRole.admin)
-  @ApiOperation({ summary: 'List staff users (admin.manage)' })
-  @ApiResponse({ status: 200, description: 'Users returned successfully' })
-  findAll() {
-    return this.userService.findAll();
+  @ApiOperation({
+    summary: 'List staff users with pagination/filters (صفحه کاربران)',
+  })
+  @ApiResponse({ status: 200, description: 'Paginated users' })
+  list(@Query() query: ListUsersDto) {
+    return this.userService.list(query);
+  }
+
+  @Get('count-by-role')
+  @ApiOperation({
+    summary: 'Count active users per role (RolesPage meters)',
+  })
+  countByRole() {
+    return this.userService.countByRole();
   }
 
   @Get(':id')
-  @Roles(UserRole.admin)
   @ApiOperation({ summary: 'Get staff user by id' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'User returned successfully' })
@@ -51,7 +62,6 @@ export class UserController {
   }
 
   @Post()
-  @Roles(UserRole.admin)
   @ApiOperation({ summary: 'Create staff user' })
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({ status: 201, description: 'User created successfully' })
@@ -61,7 +71,6 @@ export class UserController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.admin)
   @ApiOperation({ summary: 'Update staff user' })
   @ApiParam({ name: 'id', type: Number })
   @ApiBody({ type: UpdateUserDto })
@@ -72,13 +81,21 @@ export class UserController {
     return this.userService.updateUser(id, dto);
   }
 
+  @Patch(':id/active')
+  @ApiOperation({ summary: 'Activate / deactivate staff user' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiBody({ type: SetUserActiveDto })
+  setActive(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: SetUserActiveDto,
+  ) {
+    return this.userService.setActive(id, dto.active);
+  }
+
   @Patch(':id/role')
-  @Roles(UserRole.admin)
   @ApiOperation({ summary: 'Update user role' })
   @ApiParam({ name: 'id', type: Number })
   @ApiBody({ type: UpdateUserDto })
-  @ApiResponse({ status: 200, description: 'User role updated successfully' })
-  @ApiResponse({ status: 404, description: 'User not found' })
   updateRole(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateUserDto,
@@ -87,7 +104,6 @@ export class UserController {
   }
 
   @Delete(':id')
-  @Roles(UserRole.admin)
   @ApiOperation({ summary: 'Delete staff user' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'User deleted successfully' })

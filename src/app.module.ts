@@ -10,6 +10,10 @@ import { UserModule } from './user/user.module';
 import { RedisModule } from './redis/redis.module';
 import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
 import { CrmModule } from './crm/crm.module';
+import { RbacModule } from './rbac/rbac.module';
+import { SettingsModule } from './settings/settings.module';
+import { CallModule } from './call/call.module';
+import { CustomerModule } from './customer/customer.module';
 import { SupersetController } from './superset/superset.controller';
 import { SupersetService } from './superset/superset.service';
 
@@ -23,6 +27,10 @@ import { SupersetService } from './superset/superset.service';
     AuthModule,
     UserModule,
     CrmModule,
+    RbacModule,
+    SettingsModule,
+    CallModule,
+    CustomerModule,
   ],
   controllers: [AppController, SupersetController],
   providers: [AppService, ConfigService, SupersetService],

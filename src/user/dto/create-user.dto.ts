@@ -23,11 +23,12 @@ export class CreateUserDto {
   @IsIranMobile()
   mobile!: string;
 
-  @ApiProperty({ example: '123456', minLength: 6 })
-  @IsNotEmpty()
+  /** Optional — defaults to `123456` when omitted (کاربران form has no password field). */
+  @ApiPropertyOptional({ example: '123456', minLength: 6 })
+  @IsOptional()
   @IsString()
   @MinLength(6)
-  password!: string;
+  password?: string;
 
   @ApiPropertyOptional({ example: 'sara@example.com' })
   @IsOptional()

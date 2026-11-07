@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Param,
   Post,
   Query,
   Res,
@@ -12,62 +13,58 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
-  ApiQuery,
+  ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
-import { TicketService } from './ticket.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RequirePermissions } from '../rbac/permissions.decorator';
+import { PermissionsGuard } from '../rbac/permissions.guard';
 import { ExportTicketsDto } from './dto/export-tickets.dto';
+import { ListTicketsDto } from './dto/list-tickets.dto';
+import { TicketService } from './ticket.service';
 
 @Controller('ticket')
 @ApiTags('Tickets')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
+@RequirePermissions('tickets.view')
+@ApiBearerAuth()
 export class TicketController {
   constructor(private readonly ticketService: TicketService) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get paginated tickets' })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number (starts from 1)',
+  @ApiOperation({
+    summary: 'List tickets with filters/sort/pagination (صفحه تیکت‌ها)',
   })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Number of items per page',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Return list of tickets with pagination metadata.',
-  })
-  async getTickets(
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '60',
-  ) {
-    const pageNumber = Number.parseInt(page, 10) || 1;
-    const limitNumber = Number.parseInt(limit, 10) || 60;
+  @ApiResponse({ status: 200, description: 'Paginated CRM tickets' })
+  list(@Query() query: ListTicketsDto) {
+    return this.ticketService.list(query);
+  }
 
-    const result = await this.ticketService.findAll(pageNumber, limitNumber);
-    return {
-      data: result.data,
-      meta: {
-        total: result.total,
-        page: pageNumber,
-        limit: limitNumber,
-      },
-    };
+  @Get('filter-options')
+  @ApiOperation({ summary: 'Distinct types + subject paths for column filters' })
+  filterOptions() {
+    return this.ticketService.getFilterOptions();
+  }
+
+  @Get('adjacent')
+  @ApiOperation({ summary: 'Previous/next ticket ids inside the current filter' })
+  adjacent(@Query() query: ListTicketsDto & { id: string }) {
+    const { id, ...filter } = query;
+    return this.ticketService.getAdjacent(String(id), filter);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get one ticket by ticketid' })
+  @ApiParam({ name: 'id', example: '8993822' })
+  @ApiResponse({ status: 404, description: 'Ticket not found' })
+  findOne(@Param('id') id: string) {
+    return this.ticketService.findById(id);
   }
 
   @Post('export')
-  @UseGuards(JwtAuthGuard) // حفاظت از متد با توکن امنیتی JWT
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Export selected tickets to Excel' })
+  @ApiOperation({ summary: 'Export selected tickets to Excel (tickets.view)' })
   @ApiBody({ type: ExportTicketsDto })
   async exportTickets(
     @Body() exportDto: ExportTicketsDto,
@@ -75,7 +72,6 @@ export class TicketController {
   ) {
     const buffer = await this.ticketService.exportToExcel(exportDto.ticketIds);
 
-    // تنظیم هدرهای HTTP برای دانلود فایل اکسل در مرورگر
     res.header(
       'Content-Type',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

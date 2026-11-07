@@ -4,12 +4,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UserEntity, UserRole } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
+import { ListUsersDto } from './dto/list-users.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import type { AuthUser } from '../auth/auth.types';
+import { permissionsOf } from '../rbac/permission';
 
 /** Staff user shape aligned with smart-dashboard StaffUser. */
 export type SafeUser = {
@@ -23,6 +25,16 @@ export type SafeUser = {
   createdAt: Date;
   lastLoginAt?: Date;
 };
+
+/** Page shape aligned with smart-dashboard `Page<T>`. */
+export type SafeUserPage = {
+  items: SafeUser[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+const DEFAULT_STAFF_PASSWORD = '123456';
 
 @Injectable()
 export class UserService {
@@ -38,12 +50,39 @@ export class UserService {
     return await this.userRepo.findOne({ where: { id } });
   }
 
-  async findAll(): Promise<SafeUser[]> {
-    const users = await this.userRepo.find({
+  async list(query: ListUsersDto): Promise<SafeUserPage> {
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 20;
+    const where: Record<string, unknown>[] = [];
+
+    const base: Record<string, unknown> = {};
+    if (query.role !== undefined) base.role = query.role;
+    if (query.active !== undefined) base.active = query.active;
+
+    const search = query.search?.trim();
+    if (search) {
+      where.push(
+        { ...base, fullName: ILike(`%${search}%`) },
+        { ...base, mobile: ILike(`%${search}%`) },
+        { ...base, email: ILike(`%${search}%`) },
+      );
+    } else if (Object.keys(base).length > 0) {
+      where.push(base);
+    }
+
+    const [users, total] = await this.userRepo.findAndCount({
+      where: where.length > 0 ? where : undefined,
       order: { createdAt: 'DESC' },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
     });
 
-    return users.map((user) => this.toSafeUser(user));
+    return {
+      items: users.map((user) => this.toSafeUser(user)),
+      total,
+      page,
+      pageSize,
+    };
   }
 
   async findOne(id: number): Promise<SafeUser> {
@@ -65,13 +104,16 @@ export class UserService {
     await this.ensureMobileIsAvailable(dto.mobile);
     await this.ensureEmailIsAvailable(dto.email);
 
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const hashedPassword = await bcrypt.hash(
+      dto.password?.trim() || DEFAULT_STAFF_PASSWORD,
+      10,
+    );
     const user = this.userRepo.create({
-      fullName: dto.fullName,
+      fullName: dto.fullName.trim(),
       mobile: dto.mobile,
-      email: dto.email ?? null,
+      email: dto.email?.trim() ? dto.email.trim() : null,
       role: dto.role ?? UserRole.agent,
-      team: dto.team,
+      team: dto.team.trim(),
       active: dto.active ?? true,
       password: hashedPassword,
     });
@@ -87,7 +129,7 @@ export class UserService {
     }
 
     if (dto.fullName !== undefined) {
-      user.fullName = dto.fullName;
+      user.fullName = dto.fullName.trim();
     }
 
     if (dto.mobile && dto.mobile !== user.mobile) {
@@ -95,9 +137,12 @@ export class UserService {
       user.mobile = dto.mobile;
     }
 
-    if (dto.email !== undefined && dto.email !== user.email) {
-      await this.ensureEmailIsAvailable(dto.email, id);
-      user.email = dto.email;
+    if (dto.email !== undefined) {
+      const nextEmail = dto.email.trim() ? dto.email.trim() : null;
+      if (nextEmail !== user.email) {
+        await this.ensureEmailIsAvailable(nextEmail ?? undefined, id);
+        user.email = nextEmail;
+      }
     }
 
     if (dto.role !== undefined) {
@@ -105,7 +150,7 @@ export class UserService {
     }
 
     if (dto.team !== undefined) {
-      user.team = dto.team;
+      user.team = dto.team.trim();
     }
 
     if (dto.active !== undefined) {
@@ -119,6 +164,33 @@ export class UserService {
     }
 
     return this.toSafeUser(await this.userRepo.save(user));
+  }
+
+  async setActive(id: number, active: boolean): Promise<SafeUser> {
+    return this.updateUser(id, { active });
+  }
+
+  /** Active users only — matches RolesPage `countByRole`. */
+  async countByRole(): Promise<Record<UserRole, number>> {
+    const rows = await this.userRepo
+      .createQueryBuilder('user')
+      .select('user.role', 'role')
+      .addSelect('COUNT(*)', 'count')
+      .where('user.active = :active', { active: true })
+      .groupBy('user.role')
+      .getRawMany<{ role: UserRole; count: string }>();
+
+    const counts: Record<UserRole, number> = {
+      [UserRole.agent]: 0,
+      [UserRole.supervisor]: 0,
+      [UserRole.admin]: 0,
+    };
+
+    for (const row of rows) {
+      counts[row.role] = Number(row.count) || 0;
+    }
+
+    return counts;
   }
 
   async deleteUser(id: number) {
@@ -156,6 +228,7 @@ export class UserService {
       fullName: user.fullName,
       mobile: user.mobile,
       role: user.role,
+      permissions: [...permissionsOf(user.role)],
     };
   }
 

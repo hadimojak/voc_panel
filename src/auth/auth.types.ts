@@ -1,4 +1,5 @@
 import type { Request } from 'express';
+import type { Permission } from '../rbac/permission';
 import type { UserRole } from '../user/user.entity';
 
 export type AuthUser = {
@@ -6,6 +7,8 @@ export type AuthUser = {
   fullName: string;
   mobile: string;
   role: UserRole;
+  /** Effective permissions from the دسترسی‌ها RBAC matrix. */
+  permissions: Permission[];
 };
 
 export type JwtPayload = {

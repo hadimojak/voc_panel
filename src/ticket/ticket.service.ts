@@ -8,6 +8,11 @@ import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as ExcelJS from 'exceljs';
 import { normalizeOpenEnumValue } from '../common/types/open-enum';
+import type { ListTicketsDto } from './dto/list-tickets.dto';
+import {
+  applyTicketFilters,
+  applyTicketSort,
+} from './ticket-query.builder';
 
 const OPEN_ENUM_FIELDS = [
   'tickettype',
@@ -19,6 +24,23 @@ const OPEN_ENUM_FIELDS = [
   'sentiment',
   'priority',
 ] as const;
+
+export type TicketPage = {
+  items: TicketEntity[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+export type TicketFilterOptions = {
+  types: string[];
+  subjectPaths: Array<{ level1: string; level2: string; level3: string }>;
+};
+
+export type AdjacentTickets = {
+  previousId: string | null;
+  nextId: string | null;
+};
 
 @Injectable()
 export class TicketService {
@@ -40,29 +62,126 @@ export class TicketService {
     await this.ticketRepo.upsert(normalized, ['ticketid']);
   }
 
+  /**
+   * Removes tickets whose activity is older than the cutoff
+   * (uses modifiedtime, falls back to createdtime).
+   */
+  async deleteOlderThan(cutoff: Date): Promise<number> {
+    const result = await this.ticketRepo
+      .createQueryBuilder()
+      .delete()
+      .from(TicketEntity)
+      .where(
+        'COALESCE(modifiedtime, createdtime) IS NOT NULL AND COALESCE(modifiedtime, createdtime) < :cutoff',
+        { cutoff },
+      )
+      .execute();
+
+    return result.affected ?? 0;
+  }
+
   async findLastTicket(): Promise<TicketEntity | null> {
     return await this.ticketRepo.findOne({
       order: { ticketid: 'DESC' },
     });
   }
 
+  async list(query: ListTicketsDto): Promise<TicketPage> {
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 20;
+
+    const qb = this.ticketRepo.createQueryBuilder('ticket');
+    applyTicketFilters(qb, query);
+    applyTicketSort(qb, query.sort, query.dir);
+
+    const [items, total] = await qb
+      .skip((page - 1) * pageSize)
+      .take(pageSize)
+      .getManyAndCount();
+
+    return { items, total, page, pageSize };
+  }
+
+  /** @deprecated Prefer list() — kept for callers that only need page/limit. */
   async findAll(
     page: number,
     limit: number,
   ): Promise<{ data: TicketEntity[]; total: number }> {
-    const skip = (page - 1) * limit;
+    const result = await this.list({ page, pageSize: limit });
+    return { data: result.items, total: result.total };
+  }
 
-    const [data, total] = await this.ticketRepo.findAndCount({
-      skip: skip,
-      take: limit,
-      order: {
-        createdtime: 'DESC', // معمولاً تیکت‌های جدیدتر در ابتدا نمایش داده می‌شوند
-      },
-    });
+  async findById(id: string): Promise<TicketEntity> {
+    const ticket = await this.ticketRepo.findOne({ where: { ticketid: id } });
+    if (!ticket) throw new NotFoundException('تیکتی یافت نشد.');
+    return ticket;
+  }
 
+  async getFilterOptions(): Promise<TicketFilterOptions> {
+    const typeRows = await this.ticketRepo
+      .createQueryBuilder('ticket')
+      .select('ticket.tickettype', 'tickettype')
+      .distinct(true)
+      .where("ticket.tickettype IS NOT NULL AND ticket.tickettype <> ''")
+      .orderBy('ticket.tickettype', 'ASC')
+      .getRawMany<{ tickettype: string }>();
+
+    const types = [
+      ...new Set(
+        typeRows.map((row) =>
+          row.tickettype === 'شکایات' ? 'شکایت' : row.tickettype,
+        ),
+      ),
+    ].sort((a, b) => a.localeCompare(b, 'fa'));
+
+    // Use `.distinct(true)` — putting DISTINCT inside select() breaks with addSelect.
+    const pathRows = await this.ticketRepo
+      .createQueryBuilder('ticket')
+      .select(
+        `COALESCE(NULLIF(ticket.maincomplaint, ''), ticket.mainticket)`,
+        'level1',
+      )
+      .addSelect('ticket.subticket', 'level2')
+      .addSelect('ticket.reqtypeticket', 'level3')
+      .distinct(true)
+      .where(
+        `COALESCE(NULLIF(ticket.maincomplaint, ''), ticket.mainticket) IS NOT NULL
+         AND COALESCE(NULLIF(ticket.maincomplaint, ''), ticket.mainticket) <> ''`,
+      )
+      .getRawMany<{ level1: string; level2: string | null; level3: string | null }>();
+
+    const subjectPaths = pathRows
+      .map((row) => ({
+        level1: row.level1,
+        level2: row.level2?.trim() || 'ندارد',
+        level3: row.level3?.trim() || 'ندارد',
+      }))
+      .sort(
+        (a, b) =>
+          a.level1.localeCompare(b.level1, 'fa') ||
+          a.level2.localeCompare(b.level2, 'fa') ||
+          a.level3.localeCompare(b.level3, 'fa'),
+      );
+
+    return { types, subjectPaths };
+  }
+
+  async getAdjacent(
+    id: string,
+    query: ListTicketsDto,
+  ): Promise<AdjacentTickets> {
+    const qb = this.ticketRepo.createQueryBuilder('ticket');
+    applyTicketFilters(qb, query);
+    applyTicketSort(qb, query.sort, query.dir);
+    qb.select('ticket.ticketid', 'ticketid');
+
+    const rows = await qb.getRawMany<{ ticketid: string }>();
+    const ids = rows.map((row) => String(row.ticketid));
+    const index = ids.indexOf(String(id));
+    if (index === -1) return { previousId: null, nextId: null };
     return {
-      data,
-      total,
+      previousId: ids[index - 1] ?? null,
+      nextId: ids[index + 1] ?? null,
     };
   }
 

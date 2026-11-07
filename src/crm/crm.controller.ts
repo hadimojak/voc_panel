@@ -7,31 +7,29 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { Roles } from '../user/guards/userRole.decorator';
-import { RolesGuard } from '../user/guards/userRole.guard';
-import { UserRole } from '../user/user.entity';
+import { RequirePermissions } from '../rbac/permissions.decorator';
+import { PermissionsGuard } from '../rbac/permissions.guard';
 import { CrmSyncService } from './crm-sync.service';
 import { StartCrmSyncDto } from './dto/start-crm-sync.dto';
 
 @ApiTags('CRM')
 @Controller('crm')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
+@RequirePermissions('admin.manage')
 @ApiBearerAuth()
 export class CrmController {
   constructor(private readonly crmSyncService: CrmSyncService) {}
 
   @Get('sync/status')
-  @Roles(UserRole.admin)
-  @ApiOperation({ summary: 'CRM sync cursor / running status' })
+  @ApiOperation({ summary: 'CRM sync cursor / running status (admin.manage)' })
   getStatus() {
     return this.crmSyncService.getCursor();
   }
 
   @Post('sync')
-  @Roles(UserRole.admin)
   @ApiOperation({
     summary:
-      'Fetch CRM tickets in chunks until has_more=false and upsert into tickets (requires company VPN)',
+      'Fetch CRM tickets in chunks until has_more=false and upsert into tickets (admin.manage; requires company VPN)',
   })
   @ApiBody({ type: StartCrmSyncDto, required: false })
   @ApiResponse({ status: 201, description: 'Sync finished (or stopped on CRM error)' })

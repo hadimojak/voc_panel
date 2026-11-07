@@ -48,6 +48,11 @@ async function bootstrap() {
     .addBearerAuth()
     .addTag('tickets')
     .addTag('Auth')
+    .addTag('RBAC')
+    .addTag('Users')
+    .addTag('Settings')
+    .addTag('Calls')
+    .addTag('Customers')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

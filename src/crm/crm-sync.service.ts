@@ -10,6 +10,7 @@ import axios, { AxiosError } from 'axios';
 import { Repository } from 'typeorm';
 import { ConfigService } from '../config/config.service';
 import { TicketService } from '../ticket/ticket.service';
+import { formatCrmDateTime, oneYearAgoDate } from './crm-date.util';
 import { CrmSyncCursorEntity } from './crm-sync-cursor.entity';
 import { mapCrmRowToTicket } from './crm-ticket.mapper';
 import type {
@@ -44,7 +45,8 @@ export class CrmSyncService {
   }
 
   async getCursor() {
-    const cursor = await this.ensureCursor();
+    const cutoff = oneYearAgoDate();
+    const cursor = await this.ensureCursor(cutoff);
     return {
       key: cursor.key,
       lastModified: cursor.lastModified,
@@ -52,22 +54,31 @@ export class CrmSyncService {
       chunksProcessed: cursor.chunksProcessed,
       ticketsUpserted: cursor.ticketsUpserted,
       updatedAt: cursor.updatedAt,
+      windowStart: formatCrmDateTime(cutoff),
       running: this.running,
     };
   }
 
   /**
-   * Pull CRM chunks until `has_more` is false.
-   * After each successful upsert, advances `last_modified` ← `next_modified`.
+   * Each run:
+   * 1) deletes tickets older than 1 year
+   * 2) starts CRM fetch from (now - 1 year)
+   * 3) pages with next_modified until has_more=false
+   * 4) upserts each chunk into tickets
    */
-  async syncUpdatedTickets(options?: {
+  async syncUpdatedTickets(_options?: {
     reset?: boolean;
   }): Promise<CrmSyncResult> {
+    const cutoff = oneYearAgoDate();
+    const windowStart = formatCrmDateTime(cutoff);
+
     if (!ConfigService.config.crm.syncEnabled) {
       return {
         chunks: 0,
         upserted: 0,
-        lastModified: ConfigService.config.crm.initialLastModified,
+        deleted: 0,
+        windowStart,
+        lastModified: windowStart,
         lastTicketId: ConfigService.config.crm.initialLastTicketId,
         hasMore: false,
         stoppedReason: 'disabled',
@@ -81,13 +92,18 @@ export class CrmSyncService {
     this.running = true;
     let chunks = 0;
     let upserted = 0;
+    let deleted = 0;
 
     try {
-      if (options?.reset) {
-        await this.resetCursor();
+      deleted = await this.ticketService.deleteOlderThan(cutoff);
+      if (deleted > 0) {
+        this.logger.warn(
+          `Removed ${deleted} ticket(s) older than ${windowStart}`,
+        );
       }
 
-      let cursor = await this.ensureCursor();
+      // Always re-open the rolling 1-year window for this job.
+      let cursor = await this.resetCursorToWindow(cutoff);
       let hasMore = true;
       let stoppedReason: CrmSyncResult['stoppedReason'] = 'complete';
 
@@ -123,7 +139,6 @@ export class CrmSyncService {
         chunks += 1;
         upserted += tickets.length;
 
-        // Advance pagination cursor: last_modified ← next_modified (CRM contract).
         const nextModified =
           response.next_modified?.trim() || cursor.lastModified;
         cursor.lastModified = nextModified;
@@ -144,6 +159,8 @@ export class CrmSyncService {
       return {
         chunks,
         upserted,
+        deleted,
+        windowStart,
         lastModified: cursor.lastModified,
         lastTicketId: cursor.lastTicketId,
         hasMore,
@@ -183,7 +200,7 @@ export class CrmSyncService {
     }
   }
 
-  private async ensureCursor(): Promise<CrmSyncCursorEntity> {
+  private async ensureCursor(cutoff: Date): Promise<CrmSyncCursorEntity> {
     const existing = await this.cursorRepo.findOne({
       where: { key: CURSOR_KEY },
     });
@@ -192,7 +209,7 @@ export class CrmSyncService {
     return this.cursorRepo.save(
       this.cursorRepo.create({
         key: CURSOR_KEY,
-        lastModified: ConfigService.config.crm.initialLastModified,
+        lastModified: formatCrmDateTime(cutoff),
         lastTicketId: ConfigService.config.crm.initialLastTicketId,
         chunksProcessed: 0,
         ticketsUpserted: 0,
@@ -200,7 +217,18 @@ export class CrmSyncService {
     );
   }
 
-  private async resetCursor(): Promise<void> {
+  private async resetCursorToWindow(
+    cutoff: Date,
+  ): Promise<CrmSyncCursorEntity> {
     await this.cursorRepo.delete({ key: CURSOR_KEY });
+    return this.cursorRepo.save(
+      this.cursorRepo.create({
+        key: CURSOR_KEY,
+        lastModified: formatCrmDateTime(cutoff),
+        lastTicketId: ConfigService.config.crm.initialLastTicketId,
+        chunksProcessed: 0,
+        ticketsUpserted: 0,
+      }),
+    );
   }
 }

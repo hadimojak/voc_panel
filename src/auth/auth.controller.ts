@@ -27,7 +27,7 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description:
-      'Login successful. Returns user { id, fullName, mobile, role } plus tokens',
+      'Login successful. Returns user { id, fullName, mobile, role, permissions } plus tokens',
   })
   @ApiResponse({
     status: 401,
@@ -83,7 +83,8 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Current session user (id, fullName, mobile, role)',
+    summary:
+      'Current session user (id, fullName, mobile, role, permissions)',
   })
   @ApiResponse({
     status: 200,

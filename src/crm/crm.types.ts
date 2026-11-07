@@ -50,6 +50,10 @@ export type CrmFetchResponse = {
 export type CrmSyncResult = {
   chunks: number;
   upserted: number;
+  /** Tickets removed because they were older than the 1-year window. */
+  deleted: number;
+  /** Sync window start (`last_modified` for the first CRM request). */
+  windowStart: string;
   lastModified: string;
   lastTicketId: string;
   hasMore: boolean;
