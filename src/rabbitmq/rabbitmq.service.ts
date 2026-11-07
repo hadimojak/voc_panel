@@ -32,8 +32,6 @@ export class RabbitmqService implements OnModuleInit, OnModuleDestroy {
 
     this.channel = await this.connection.createChannel();
     await this.channel.assertQueue('voc_panel.health', { durable: true });
-
-    this.logger.log(`RabbitMQ connected at ${RABBITMQ_HOST}:${RABBITMQ_PORT}`);
   }
 
   getChannel(): amqp.Channel {

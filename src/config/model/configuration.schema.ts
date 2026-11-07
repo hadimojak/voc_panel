@@ -10,6 +10,7 @@ export const ConfigValidationSchema: Joi.ObjectSchema<EnvValidationInterface> =
     POSTGRES_DB: Joi.string().required(),
     POSTGRES_USER: Joi.string().alphanum().min(3).required(),
     POSTGRES_PASSWORD: Joi.string().min(6).required(),
+    TYPEORM_SYNCHRONIZE: Joi.boolean().truthy('true').falsy('false').default(true),
     //redis
     REDIS_HOST: Joi.string().hostname().required(),
     REDIS_PORT: Joi.number().port().default(6379),
@@ -28,4 +29,13 @@ export const ConfigValidationSchema: Joi.ObjectSchema<EnvValidationInterface> =
     SUPERSET_USERNAME: Joi.string().required(),
     SUPERSET_PASSWORD: Joi.string().required(),
     SUPERSET_PROVIDER: Joi.string().required(),
+    // CRM VOC fetch (company VPN required)
+    CRM_FETCH_URL: Joi.string()
+      .uri()
+      .default('https://crm.dayins.com/panel/rest/voc_fetch_all/'),
+    CRM_SOURCE: Joi.string().default('smart'),
+    CRM_FETCH_LIMIT: Joi.number().integer().min(1).max(5000).default(1000),
+    CRM_SYNC_ENABLED: Joi.boolean().truthy('true').falsy('false').default(true),
+    CRM_INITIAL_LAST_MODIFIED: Joi.string().default('2025-07-19 16:49:47'),
+    CRM_INITIAL_LAST_TICKETID: Joi.string().default('99999999999999'),
   }).unknown(true);

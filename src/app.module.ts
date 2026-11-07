@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TaskService } from './task/task.service';
 import { ConfigService } from './config/config.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { DatabaseModule } from './database/database.module';
@@ -10,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { RedisModule } from './redis/redis.module';
 import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
+import { CrmModule } from './crm/crm.module';
 import { SupersetController } from './superset/superset.controller';
 import { SupersetService } from './superset/superset.service';
 
@@ -22,8 +22,9 @@ import { SupersetService } from './superset/superset.service';
     TicketModule,
     AuthModule,
     UserModule,
+    CrmModule,
   ],
   controllers: [AppController, SupersetController],
-  providers: [AppService, TaskService, ConfigService, SupersetService],
+  providers: [AppService, ConfigService, SupersetService],
 })
 export class AppModule {}

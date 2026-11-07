@@ -8,12 +8,18 @@ import { ConfigService } from './config/config.service';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { DataSource } from 'typeorm';
+import { ensureDatabaseExists } from './database/ensure-database';
 
 async function bootstrap() {
   const { port } = ConfigService.config.app;
+
+  // Ensure DB exists, then TypeORM synchronize creates missing tables from entities.
+  await ensureDatabaseExists();
+
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
+    { logger: ['error', 'warn', 'fatal'] },
   );
   app.useGlobalPipes(
     new ValidationPipe({
@@ -26,6 +32,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:3000',
+      'http://localhost:5000',
       'http://localhost:5002',
       'http://localhost:5173',
     ],
@@ -49,7 +56,6 @@ async function bootstrap() {
   try {
     const dataSource = app.get(DataSource);
     await dataSource.query('SELECT 1');
-    Logger.log('Postgres connected');
   } catch (error) {
     Logger.error('Postgres connection failed', error);
     await app.close();
@@ -57,6 +63,6 @@ async function bootstrap() {
   }
 
   await app.listen(port);
-  Logger.verbose(`API running on http://localhost:${port}`);
+  Logger.warn(`API running on http://localhost:${port}`);
 }
 void bootstrap();

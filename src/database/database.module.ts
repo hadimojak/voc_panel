@@ -12,7 +12,9 @@ import { ConfigService } from '../config/config.service';
       password: ConfigService.config.postgress.POSTGRES_PASSWORD,
       database: ConfigService.config.postgress.POSTGRES_DB,
       autoLoadEntities: true,
-      synchronize: false,
+      // Code-first: create/update tables from @Entity classes on connect.
+      synchronize: ConfigService.config.postgress.synchronize,
+      logging: false,
     }),
   ],
 })

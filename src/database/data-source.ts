@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import { TicketEntity } from '../ticket/ticket.entity';
 import { ConfigService } from '../config/config.service';
 import { UserEntity } from '../user/user.entity';
+import { CrmSyncCursorEntity } from '../crm/crm-sync-cursor.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -11,7 +12,8 @@ export const AppDataSource = new DataSource({
   username: ConfigService.config.postgress.POSTGRES_USER,
   password: ConfigService.config.postgress.POSTGRES_PASSWORD,
   database: ConfigService.config.postgress.POSTGRES_DB,
-  entities: [TicketEntity, UserEntity],
+  entities: [TicketEntity, UserEntity, CrmSyncCursorEntity],
   migrations: ['src/database/migrations/*.ts'],
-  synchronize: false,
+  synchronize: ConfigService.config.postgress.synchronize,
+  logging: false,
 });

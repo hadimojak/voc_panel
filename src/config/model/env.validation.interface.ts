@@ -6,6 +6,8 @@ export interface EnvValidationInterface {
   POSTGRES_DB: string;
   POSTGRES_USER: string;
   POSTGRES_PASSWORD: string;
+  /** When true, TypeORM creates/updates tables from entities on connect (code-first). */
+  TYPEORM_SYNCHRONIZE: boolean;
 
   REDIS_HOST: string;
   REDIS_PORT: number;
@@ -24,4 +26,11 @@ export interface EnvValidationInterface {
   SUPERSET_USERNAME: string;
   SUPERSET_PASSWORD: string;
   SUPERSET_PROVIDER: string;
+
+  CRM_FETCH_URL: string;
+  CRM_SOURCE: string;
+  CRM_FETCH_LIMIT: number;
+  CRM_SYNC_ENABLED: boolean;
+  CRM_INITIAL_LAST_MODIFIED: string;
+  CRM_INITIAL_LAST_TICKETID: string;
 }

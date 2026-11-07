@@ -11,7 +11,7 @@ const fileName = `.${env}.env`;
 const filePath = path.resolve(process.cwd(), fileName);
 
 if (fs.existsSync(filePath)) {
-  dotenv.config({ path: filePath });
+  dotenv.config({ path: filePath, quiet: true });
 } else throw new Error(`Environment file ${fileName} not found!`);
 
 const validationResult: ValidationResult<EnvValidationInterface> =
@@ -40,6 +40,7 @@ export const config = {
     POSTGRES_DB: validatedEnv.POSTGRES_DB,
     POSTGRES_USER: validatedEnv.POSTGRES_USER,
     POSTGRES_PASSWORD: validatedEnv.POSTGRES_PASSWORD,
+    synchronize: validatedEnv.TYPEORM_SYNCHRONIZE,
   },
   redis: {
     REDIS_HOST: validatedEnv.REDIS_HOST,
@@ -62,6 +63,14 @@ export const config = {
     SUPERSET_USERNAME: validatedEnv.SUPERSET_USERNAME,
     SUPERSET_PASSWORD: validatedEnv.SUPERSET_PASSWORD,
     SUPERSET_PROVIDER: validatedEnv.SUPERSET_PROVIDER,
+  },
+  crm: {
+    fetchUrl: validatedEnv.CRM_FETCH_URL,
+    source: validatedEnv.CRM_SOURCE,
+    limit: validatedEnv.CRM_FETCH_LIMIT,
+    syncEnabled: validatedEnv.CRM_SYNC_ENABLED,
+    initialLastModified: validatedEnv.CRM_INITIAL_LAST_MODIFIED,
+    initialLastTicketId: validatedEnv.CRM_INITIAL_LAST_TICKETID,
   },
 } as const;
 
