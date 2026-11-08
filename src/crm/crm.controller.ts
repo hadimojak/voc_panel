@@ -21,24 +21,43 @@ export class CrmController {
   constructor(private readonly crmSyncService: CrmSyncService) {}
 
   @Get('sync/status')
-  @ApiOperation({ summary: 'CRM sync cursor / running status (admin.manage)' })
-  getStatus() {
-    return this.crmSyncService.getCursor();
-  }
-
-  @Post('sync')
   @ApiOperation({
     summary:
-      'Fetch CRM tickets in chunks until has_more=false and upsert into tickets (admin.manage; requires company VPN)',
+      'Ticket + call CRM sync cursors from root JSON file (admin.manage)',
+  })
+  getStatus() {
+    return this.crmSyncService.getStatus();
+  }
+
+  @Post('sync/tickets')
+  @ApiOperation({
+    summary:
+      'Start background job: fetch new tickets via voc_fetch_all until has_more=false (admin.manage; VPN)',
   })
   @ApiBody({ type: StartCrmSyncDto, required: false })
-  @ApiResponse({ status: 201, description: 'Sync finished (or stopped on CRM error)' })
-  @ApiResponse({ status: 409, description: 'Sync already running' })
+  @ApiResponse({ status: 201, description: 'Ticket sync job started' })
+  @ApiResponse({ status: 409, description: 'Ticket sync already running' })
   @ApiResponse({
     status: 503,
     description: 'CRM unreachable (connect to company VPN)',
   })
-  sync(@Body() dto: StartCrmSyncDto) {
-    return this.crmSyncService.syncUpdatedTickets({ reset: dto?.reset });
+  syncTickets(@Body() dto: StartCrmSyncDto) {
+    return this.crmSyncService.startTicketsSync({ reset: dto?.reset });
+  }
+
+  @Post('sync/calls')
+  @ApiOperation({
+    summary:
+      'Start background job: fetch new calls via voc_fetch_all_calls until has_more=false (admin.manage; VPN)',
+  })
+  @ApiBody({ type: StartCrmSyncDto, required: false })
+  @ApiResponse({ status: 201, description: 'Call sync job started' })
+  @ApiResponse({ status: 409, description: 'Call sync already running' })
+  @ApiResponse({
+    status: 503,
+    description: 'CRM unreachable (connect to company VPN)',
+  })
+  syncCalls(@Body() dto: StartCrmSyncDto) {
+    return this.crmSyncService.startCallsSync({ reset: dto?.reset });
   }
 }

@@ -28,9 +28,10 @@ export interface EnvValidationInterface {
   SUPERSET_PROVIDER: string;
 
   CRM_FETCH_URL: string;
+  CRM_CALLS_FETCH_URL: string;
   CRM_SOURCE: string;
   CRM_FETCH_LIMIT: number;
   CRM_SYNC_ENABLED: boolean;
-  CRM_INITIAL_LAST_MODIFIED: string;
   CRM_INITIAL_LAST_TICKETID: string;
+  CRM_CURSOR_FILE: string;
 }

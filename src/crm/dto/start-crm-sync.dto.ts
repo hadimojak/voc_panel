@@ -4,7 +4,7 @@ import { IsBoolean, IsOptional } from 'class-validator';
 export class StartCrmSyncDto {
   @ApiPropertyOptional({
     description:
-      'Ignored for windowing — every sync already starts from (now - 1 year) and purges older tickets first',
+      'When true, reset last_ticketid in the JSON cursor back to CRM_INITIAL_LAST_TICKETID before syncing',
     default: false,
   })
   @IsOptional()

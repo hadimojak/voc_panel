@@ -93,3 +93,4 @@ docker-compose.override.yml
 # ------------------------------
 /migration/*
 day-ticket-1.json
+crm-sync-cursors.json

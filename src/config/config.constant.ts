@@ -66,11 +66,12 @@ export const config = {
   },
   crm: {
     fetchUrl: validatedEnv.CRM_FETCH_URL,
+    callsFetchUrl: validatedEnv.CRM_CALLS_FETCH_URL,
     source: validatedEnv.CRM_SOURCE,
     limit: validatedEnv.CRM_FETCH_LIMIT,
     syncEnabled: validatedEnv.CRM_SYNC_ENABLED,
-    initialLastModified: validatedEnv.CRM_INITIAL_LAST_MODIFIED,
     initialLastTicketId: validatedEnv.CRM_INITIAL_LAST_TICKETID,
+    cursorFile: validatedEnv.CRM_CURSOR_FILE,
   },
 } as const;
 
