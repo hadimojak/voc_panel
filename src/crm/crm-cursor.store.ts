@@ -29,12 +29,25 @@ const emptyCursor = (lastTicketId: string): CrmStreamCursor => ({
   lastError: null,
 });
 
-/** Absolute path of the root JSON cursor file (persists between process restarts). */
+/**
+ * Nest project root (`voc_panel/`), found via package.json — not process.cwd()
+ * and never the OS drive root.
+ */
+function projectRoot(): string {
+  let dir = __dirname;
+  while (dir !== path.dirname(dir)) {
+    if (fs.existsSync(path.join(dir, 'package.json'))) return dir;
+    dir = path.dirname(dir);
+  }
+  // Fallback: dist/crm or src/crm → ../../
+  return path.resolve(__dirname, '..', '..');
+}
+
+/** Absolute path of `crm-sync-cursors.json` inside the voc_panel project root. */
 export function cursorFilePath(): string {
-  const configured = ConfigService.config.crm.cursorFile;
-  return path.isAbsolute(configured)
-    ? configured
-    : path.resolve(process.cwd(), configured);
+  const configured = ConfigService.config.crm.cursorFile.trim() || 'crm-sync-cursors.json';
+  const fileName = path.basename(configured);
+  return path.join(projectRoot(), fileName);
 }
 
 export function readCursorFile(): CrmCursorFile {
